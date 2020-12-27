@@ -1,0 +1,53 @@
+{
+  "name": "berial",
+  "version": "0.0.8",
+  "description": "micro frontend",
+  "main": "dist/berial.js",
+  "module": "dist/berial.esm.js",
+  "types": "dist/types/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c --watch",
+    "check": "run-p fmt-check lint",
+    "fix": "run-s \"lint -- --fix\"",
+    "fmt": "run-s \"fmt-check -- --write\"",
+    "fmt-check": "prettier --check **/*.{md,json,ts}",
+    "lint": "eslint **/*.ts",
+    "type": "tsc --project tsconfig.json --skipLibCheck --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/berialjs/berial.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/berialjs/berial/issues"
+  },
+  "homepage": "https://github.com/berialjs/berial#readme",
+  "devDependencies": {
+    "cross-env": "^7.0.2",
+    "eslint": "^7.5.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-react": "^7.20.5",
+    "http-server": "^0.12.3",
+    "husky": "^4.2.5",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.0.5",
+    "rollup": "^2.23.0",
+    "rollup-plugin-dts": "^1.4.11",
+    "rollup-plugin-typescript2": "^0.27.1",
+    "serve": "^11.3.2",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.7",
+    "@typescript-eslint/eslint-plugin": "^3.7.0",
+    "@typescript-eslint/parser": "^3.7.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run fmt && npm run fix;"
+    }
+  }
+}
