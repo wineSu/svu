@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reactive</title>
+</head>
+<body>
+    
+</body>
+</html>
+<script>
+    // let activeEffect;
+    // class Dep{
+    //     constructor(value){
+    //         this.subscribers = new Set()
+    //         this._value = value
+    //     }
+    //     get value(){
+    //         this.depend();
+    //         return this._value
+    //     }
+    //     set value(newValue){
+    //         this._value = newValue;
+    //         this.notify()
+    //     }
+    //     depend(){
+    //         activeEffect && this.subscribers.add(activeEffect)
+    //     }
+    //     notify(){
+    //         this.subscribers.forEach(effect => {
+    //             effect()
+    //         })
+    //     }
+    // }
+
+    // function watchEffect(effect){
+    //     activeEffect = effect;
+    //     effect();
+    //     activeEffect = null;
+    // }
+
+    // const dep = new Dep('frist');
+    // const msg = new Dep('frist111');
+
+    // watchEffect(() => {
+    //     console.log('effect中有值变动：'+dep.value+ '-------' +msg.value)
+    // })
+
+    // dep.value = 'change'
+    // msg.value = '2222'
+</script>
+<script>
+    // 原理版
+    let activeEffect;
+    class Dep{
+        subscribers = new Set()
+        depend(){
+            activeEffect && this.subscribers.add(activeEffect)
+        }
+        notify(){
+            this.subscribers.forEach(effect => {
+                effect()
+            })
+        }
+    }
+
+    // 副作用
+    function watchEffect(effect){
+        activeEffect = effect;
+        effect();
+        activeEffect = null;
+    }
+
+    const targetMap = new WeakMap();
+    // 获取依赖
+    function getDep(target, key){
+        console.log(targetMap)
+        let depsMap = targetMap.get(target);
+        if(!depsMap){
+            depsMap = new Map();
+            targetMap.set(target, depsMap)
+        }
+        let dep = depsMap.get(key);
+        if(!dep){
+            dep = new Dep();
+            depsMap.set(key, dep)
+        }
+        return dep;
+    }
+    // 依赖收集
+    let reactiveHandlers = {
+        get(target, key, reciver){
+            const dep = getDep(target, key);
+            // 取值时 依赖收集
+            dep.depend();
+            return Reflect.get(target, key, reciver);
+        },
+        set(target, key, value, reciver){
+            const dep = getDep(target, key);
+            const result = Reflect.set(target, key, value, reciver);
+            dep.notify();
+            return result;
+        }
+    }
+    function reactive(raw){
+        // Object.keys(raw).forEach(key => {
+        //     const dep = new Dep();
+        //     let value = raw[key];
+        //     Object.defineProperty(raw, key, {
+        //         get(){
+        //             dep.depend();
+        //             return value
+        //         },
+        //         set(newValue){
+        //             value = newValue;
+        //             dep.notify()
+        //         }
+        //     })
+        // })
+        // return raw;
+
+        // change to use Proxy
+        return new Proxy(raw, reactiveHandlers);
+    }
+
+    const state = reactive({
+        count: [1,2,3]
+    })
+    watchEffect(() => {
+        // console.log(state)
+        console.log('effect中有值变动：'+ state.count)
+    })
+
+    state.count.push(2)
+   
+</script>

@@ -10,7 +10,7 @@
 </body>
 </html>
 <script src="../dist/vue.js"></script>
-<script>
+<!-- <script>
     const {
         createApp,
         reactive,
@@ -40,4 +40,47 @@
         }
     }
     createApp(MyComponent).mount('#app')
+</script> -->
+
+<script>
+    // 原理版
+    let activeEffect;
+    class Dep{
+        constructor(value){
+            this.subscribers = new Set()
+            this._value = value
+        }
+        get value(){
+            this.depend();
+            return this._value
+        }
+        set value(newValue){
+            this._value = newValue;
+            this.notify()
+        }
+        depend(){
+            activeEffect && this.subscribers.add(activeEffect)
+        }
+        notify(){
+            this.subscribers.forEach(effect => {
+                effect()
+            })
+        }
+    }
+
+    function watchEffect(effect){
+        activeEffect = effect;
+        effect();
+        activeEffect = null;
+    }
+
+    const dep = new Dep('frist');
+    const msg = new Dep('frist111');
+
+    watchEffect(() => {
+        console.log('effect中有值变动：'+dep.value+ '-------' +msg.value)
+    })
+
+    dep.value = 'change'
+    msg.value = '2222'
 </script>
