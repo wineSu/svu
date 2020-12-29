@@ -125,13 +125,13 @@
     }
 
     const state = reactive({
-        count: [1,2,3]
+        count: 111
     })
     watchEffect(() => {
         // console.log(state)
         console.log('effect中有值变动：'+ state.count)
     })
 
-    state.count.push(2)
+    state.count = 20
    
 </script>

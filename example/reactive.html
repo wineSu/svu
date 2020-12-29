@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reactive</title>
+</head>
+<body>
+    
+</body>
+</html>
+<script>
+    let activeEffect;
+
+    // 存储的是用户创建的各个对象  targetMap(weakMap)【多次的reciver】 --> depsMap(Map)【reciver数据中不同的键】 --> dep(Set)[用来发布订阅的执行 effect]
+    const targetMap = new WeakMap();
+    function track(target, key){
+        if(activeEffect){
+            let depsMap = targetMap.get(target);
+            if(!depsMap){
+                targetMap.set(target, depsMap = new Map())
+            }
+            let dep = depsMap.get(key);
+            if(!dep){
+                depsMap.set(key, dep = new Set())
+            }
+            dep.add(activeEffect)
+        }
+    }
+
+    function trigger(target, key){
+        let depsMap = targetMap.get(target);
+        if(depsMap){
+            let dep = depsMap.get(key);
+            dep && dep.forEach(effect => {
+                effect();
+            });
+        }
+    }
+
+    // 副作用
+    function watchEffect(effect){
+        activeEffect = effect;
+        effect();
+        activeEffect = null;
+    }
+
+    // reactive定义
+    let reactiveHandlers = {
+        get(target, key, reciver){
+            let res = Reflect.get(target, key, reciver);
+            // 取值时 添加effect回调 订阅
+            track(target, key)
+            return res;
+        },
+        set(target, key, value, reciver){
+            const oldValue = target[key];
+            const result = Reflect.set(target, key, value, reciver);
+            // 必须判断 否则effect中重复设置将会死循环
+            if(oldValue != value){
+                trigger(target, key);
+            }
+            return result;
+        }
+    }
+    function reactive(target){
+        return new Proxy(target, reactiveHandlers);
+    }
+
+    // ref
+    function ref(raw){
+        const r = {
+            get value(){
+                track(r, 'value');
+                return raw;
+            },
+            set value(newValue){
+                raw = newValue;
+                trigger(r, 'value');
+            }
+        }
+        return r;
+    }
+
+    // computed
+    function computed(getter){
+        const res = ref();
+        watchEffect(() => {
+            res.value = getter();
+        })
+        return res;
+    }
+</script>
+<script>
+    // use
+    let state = reactive({
+        count: 0
+    })
+
+    let num = ref(1);
+
+    let res = computed(() => {
+        return state.count + 10
+    })
+
+    watchEffect(() => {
+        console.log('reactive中有值变动：'+ state.count, '-----------ref变化：'+num.value);
+        // state.count = 10
+    })
+
+    console.log('计算属性：'+res.value)
+    state.count = 10
+    console.log('计算属性：'+res.value)
+    // num.value = 20
+</script>
