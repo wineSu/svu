@@ -11,10 +11,12 @@
 </html>
 <script>
     let activeEffect;
+    const effectStack = [];
 
     // 存储的是用户创建的各个对象  targetMap(weakMap)【多次的reciver】 --> depsMap(Map)【reciver数据中不同的键】 --> dep(Set)[用来发布订阅的执行 effect]
     const targetMap = new WeakMap();
     function track(target, key){
+        console.log(11111)
         if(activeEffect){
             let depsMap = targetMap.get(target);
             if(!depsMap){
@@ -32,17 +34,33 @@
         let depsMap = targetMap.get(target);
         if(depsMap){
             let dep = depsMap.get(key);
-            dep && dep.forEach(effect => {
-                effect();
-            });
+            if(dep){
+                const runEffects = new Set()
+                dep.forEach(effect => {
+                    // 避免 effect 中 state.count ++   死循环
+                    if(effect !== activeEffect){
+                        runEffects.add(effect)
+                    }
+                });
+                runEffects.forEach(effect => {
+                    effect();
+                })
+            }
         }
     }
 
     // 副作用
     function watchEffect(effect){
-        activeEffect = effect;
-        effect();
-        activeEffect = null;
+        if(!effectStack.includes(effect)){
+            try{
+                effectStack.push(effect)
+                activeEffect = effect;
+                effect();
+            }finally{
+                effectStack.pop()
+                activeEffect = effectStack[effectStack.length - 1]
+            }
+        }
     }
 
     // reactive定义
@@ -56,7 +74,7 @@
         set(target, key, value, reciver){
             const oldValue = target[key];
             const result = Reflect.set(target, key, value, reciver);
-            // 必须判断 否则effect中重复设置将会死循环
+            // 避免effect中重复设置将会死循环
             if(oldValue != value){
                 trigger(target, key);
             }
@@ -97,19 +115,21 @@
         count: 0
     })
 
-    let num = ref(1);
+    // let num = ref(1);
 
-    let res = computed(() => {
-        return state.count + 10
-    })
+    // let res = computed(() => {
+    //     return state.count + 10
+    // })
 
     watchEffect(() => {
-        console.log('reactive中有值变动：'+ state.count, '-----------ref变化：'+num.value);
-        // state.count = 10
+        console.log('reactive中有值变动：'+ state.count);
+        state.count++
     })
 
-    console.log('计算属性：'+res.value)
-    state.count = 10
-    console.log('计算属性：'+res.value)
+    // console.log('计算属性：'+res.value)
+    setTimeout(() => {
+        state.count = 10
+    }, 2000)
+    // console.log('计算属性：'+res.value)
     // num.value = 20
 </script>
