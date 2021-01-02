@@ -74,3 +74,51 @@ export function trigger(
     // 执行effect
     effects.forEach(run)
 }
+
+let uid = 0; // effect 标识
+function creatReactiveEffect<T = any>(
+    fn: () => T
+): ReactiveEffect<T>{
+    const effect = function reactiveEffect(): unknown{
+        try {
+            activeEffect = effect;
+            console.log(fn)
+            return fn();
+        } finally {
+            activeEffect = undefined;
+        }
+    } as ReactiveEffect;
+
+    // 一些辅助信息
+    effect.id = uid++;
+    effect._isEffect = true
+    effect.active = true
+    effect.raw = fn
+    
+    return effect;
+}
+
+export const isEffect = (
+    fn: any
+): fn is ReactiveEffect => fn && fn._isEffect;
+
+// 副作用
+export function effect<T = any>(
+    fn: () => T
+): ReactiveEffect<T>{
+    /**
+     * 对应测试 should not double wrap if the passed function is a effect
+     * const runner = effect(() => {
+            console.log(111111, state.count)
+        })
+        const otherRunner = effect(runner)
+        state.count = 11
+     * 
+    */ 
+    if(isEffect(fn)){
+        fn = fn.raw;
+    }
+    const effectFn = creatReactiveEffect(fn);
+    effectFn();
+    return effectFn;
+}
