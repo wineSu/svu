@@ -11,12 +11,10 @@
 </html>
 <script>
     let activeEffect;
-    const effectStack = [];
 
     // 存储的是用户创建的各个对象  targetMap(weakMap)【多次的reciver】 --> depsMap(Map)【reciver数据中不同的键】 --> dep(Set)[用来发布订阅的执行 effect]
     const targetMap = new WeakMap();
     function track(target, key){
-        console.log(11111)
         if(activeEffect){
             let depsMap = targetMap.get(target);
             if(!depsMap){
@@ -49,18 +47,22 @@
         }
     }
 
-    // 副作用
-    function watchEffect(effect){
-        if(!effectStack.includes(effect)){
+    function createReactiveEffect(fn) {
+        const effect = function reactiveEffect() {
             try{
-                effectStack.push(effect)
                 activeEffect = effect;
-                effect();
+                return fn();
             }finally{
-                effectStack.pop()
-                activeEffect = effectStack[effectStack.length - 1]
+                activeEffect = null
             }
-        }
+        };
+        return effect;
+    }
+    // 副作用
+    function watchEffect(fn){
+        const effect = createReactiveEffect(fn);
+        effect();
+        return effect;
     }
 
     // reactive定义
@@ -123,12 +125,15 @@
 
     watchEffect(() => {
         console.log('reactive中有值变动：'+ state.count);
-        state.count++
+        // state.count++
     })
 
     // console.log('计算属性：'+res.value)
     setTimeout(() => {
+        // 测试死循环
         state.count = 10
+        state.count = 11
+        state.count = 12
     }, 2000)
     // console.log('计算属性：'+res.value)
     // num.value = 20
