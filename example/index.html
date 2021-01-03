@@ -44,20 +44,40 @@
     const {
         createApp,
         reactive,
-        effect
+        effect,
+        ref,
+        computed
     } = Vue;
 
     const state = reactive({
-        count: 0
+        count: 0,
+        deep: {
+            val: 1
+        }
     })
-    
-    const runner = effect(() => {
-        console.log(111111, state.count)
+    // const num = ref(0);
+    const res = computed(() => {
+        console.log('这里被执行了')
+        return state.count++
     })
-    // state.count = 10
-    const otherRunner = effect(runner)
-    state.count = 11
+    // const runner = effect(() => {
+    //     console.log(111111, state.count)
+    // })
+    // // state.count = 10
+    // const otherRunner = effect(runner)
+    // state.count = 11
     // console.log(runner)
     // console.log(otherRunner)
+    
+    effect(() => {
+        console.log(111111, state.deep.val, state.count)
+    })
 
+    // num.value.s = 20
+    // setTimeout(() => {
+    //     state.count = 20
+    //     state.count = 21
+    // })
+    state.count = 21
+    // state.deep.val = 200
 </script>

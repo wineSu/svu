@@ -1,11 +1,15 @@
 import { Target } from '../shared/svu';
 import { 
-  hasChanged
+  hasChanged,
+  isObject
 } from '../shared';
 import { 
   track,
   trigger
 } from './effect';
+import {
+  reactive
+} from './reactive';
 
 function createGetter(){
   return (
@@ -15,6 +19,10 @@ function createGetter(){
   ) => {
     let res = Reflect.get(target, key, receiver);
     track(target, key);
+    if (isObject(res)) {
+      // deep
+      return reactive(res)
+    }
     return res;
   }
 }

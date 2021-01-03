@@ -24,4 +24,18 @@ export interface ReactiveEffect<T = any> {
     active: boolean
     raw: () => T
     deps: Array<Dep>
+}
+
+// computed
+export type ComputedGetter<T> = (ctx?: any) => T
+export type ComputedSetter<T> = (v: T) => void
+
+export interface WritableComputedOptions<T> {
+  get: ComputedGetter<T>
+  set: ComputedSetter<T>
+}
+
+export interface ReactiveEffectOptions {
+    lazy?: boolean
+    scheduler?: (job: ReactiveEffect) => void
   }

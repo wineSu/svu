@@ -3,7 +3,8 @@ import {
 } from '../shared';
 import {
     ReactiveEffect,
-    KeyToDepMap
+    KeyToDepMap,
+    ReactiveEffectOptions
 } from '../shared/svu'
 
 /**
@@ -82,7 +83,6 @@ function creatReactiveEffect<T = any>(
     const effect = function reactiveEffect(): unknown{
         try {
             activeEffect = effect;
-            console.log(fn)
             return fn();
         } finally {
             activeEffect = undefined;
@@ -104,7 +104,8 @@ export const isEffect = (
 
 // 副作用
 export function effect<T = any>(
-    fn: () => T
+    fn: () => T,
+    options: ReactiveEffectOptions = {}
 ): ReactiveEffect<T>{
     /**
      * 对应测试 should not double wrap if the passed function is a effect
@@ -119,6 +120,7 @@ export function effect<T = any>(
         fn = fn.raw;
     }
     const effectFn = creatReactiveEffect(fn);
-    effectFn();
+    // computed 初始不计算
+    !options.lazy && effectFn();
     return effectFn;
 }

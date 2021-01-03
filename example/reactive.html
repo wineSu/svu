@@ -113,20 +113,21 @@
 </script>
 <script>
     // use
-    // let state = reactive({
-    //     count: 0
-    // })
+    let state = reactive({
+        count: 0
+    })
 
     // // let num = ref(1);
 
-    // // let res = computed(() => {
-    // //     return state.count + 10
-    // // })
+    let res = computed(() => {
+        console.log(1111111)
+        return state.count + 10
+    })
 
-    // watchEffect(() => {
-    //     console.log('reactive中有值变动：'+ state.count);
-    //     // state.count++
-    // })
+    watchEffect(() => {
+        console.log('reactive中有值变动：'+ res.value);
+        // state.count++
+    })
 
     // // console.log('计算属性：'+res.value)
     // setTimeout(() => {
@@ -138,10 +139,10 @@
     // console.log('计算属性：'+res.value)
     // num.value = 20
 
-    let dummy1, dummy2
-    const counter = reactive({ num: 0 })
-    const runner = watchEffect(() => {})
-    const otherRunner = watchEffect(runner)
-    console.log(runner)
-    console.log(runner == otherRunner)
+    // let dummy1, dummy2
+    // const counter = reactive({ num: 0 })
+    // const runner = watchEffect(() => {})
+    // const otherRunner = watchEffect(runner)
+    // console.log(runner)
+    // console.log(runner == otherRunner)
 </script>
