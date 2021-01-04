@@ -42,3 +42,15 @@ export {
   reactive
 }
 
+export function isReactive(value: any) {
+    return !!(value && value.__v_isReactive)
+  }
+  
+  
+  export function toRaw(observed: any) {
+    return true
+  }
+
+  export function markRaw(observed: any) {
+    return true
+  }

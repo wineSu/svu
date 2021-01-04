@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "outDir": "./dist",
     "paths": {
-      "@/*": ["./src/*"]
+      "@vue/*": ["packages/*/src"],
+      "vue": ["packages/vue/src"]
     }
   },
   "include": ["src/**/*"],
