@@ -70,7 +70,11 @@ export function trigger(
     }
 
     const run = (effect: ReactiveEffect) => {
-        effect();
+        if(effect.options.scheduler){
+            effect.options.scheduler(effect);
+        }else{
+            effect();
+        }
     }
     // 执行effect
     effects.forEach(run)
@@ -78,7 +82,8 @@ export function trigger(
 
 let uid = 0; // effect 标识
 function creatReactiveEffect<T = any>(
-    fn: () => T
+    fn: () => T,
+    options: ReactiveEffectOptions
 ): ReactiveEffect<T>{
     const effect = function reactiveEffect(): unknown{
         try {
@@ -94,6 +99,7 @@ function creatReactiveEffect<T = any>(
     effect._isEffect = true
     effect.active = true
     effect.raw = fn
+    effect.options = options
     
     return effect;
 }
@@ -119,7 +125,7 @@ export function effect<T = any>(
     if(isEffect(fn)){
         fn = fn.raw;
     }
-    const effectFn = creatReactiveEffect(fn);
+    const effectFn = creatReactiveEffect(fn, options);
     // computed 初始不计算
     !options.lazy && effectFn();
     return effectFn;

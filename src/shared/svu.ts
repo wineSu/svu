@@ -24,6 +24,7 @@ export interface ReactiveEffect<T = any> {
     active: boolean
     raw: () => T
     deps: Array<Dep>
+    options: ReactiveEffectOptions
 }
 
 // computed
