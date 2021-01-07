@@ -70,6 +70,7 @@ export function trigger(
     }
 
     const run = (effect: ReactiveEffect) => {
+        // computed 需要
         if(effect.options.scheduler){
             effect.options.scheduler(effect);
         }else{

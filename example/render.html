@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html>
+<script src="../dist/vue.js"></script>
+<script>
+    const { 
+        createApp,
+        h,
+        reactive 
+    } = Vue;
+
+    const App = {
+        setup() {
+            const state = reactive({ 
+                count: '0',
+                msg: 'this is my frist renderVue' 
+            })
+            return () => {
+                return h('div', {
+                    style: {
+                        color: 'blink',
+                        fontSize: '20px'
+                    }
+                }, `${state.count}--${state.msg}`)
+            }
+        }
+    }
+    createApp(App).mount('#app');
+</script>
