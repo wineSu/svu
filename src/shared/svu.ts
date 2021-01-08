@@ -39,4 +39,17 @@ export interface WritableComputedOptions<T> {
 export interface ReactiveEffectOptions {
     lazy?: boolean
     scheduler?: (job: ReactiveEffect) => void
-  }
+}
+
+
+// render
+export interface RendererNode {
+    [key: string]: any
+}
+
+export interface RendererElement extends RendererNode {}
+
+export type RootRenderFunction<HostElement = RendererElement> = (
+    vnode: null,
+    container: HostElement
+) => void

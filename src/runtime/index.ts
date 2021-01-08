@@ -5,12 +5,13 @@ import {
     isString
 } from '../shared'
 
-const createApp = (...arg: object[]) => {
-    const app = createRenderer().createApp(...arg);
+const createApp = (root: object) => {
+    const app = createRenderer().createApp(root);
     const { mount } = app;
     app.mount = (container: Element | ShadowRoot | string)=>{
-        let dom = normalizeContainer(container);
+        let dom: Element | null = normalizeContainer(container);
         if(!dom){
+            console.warn(`Failed to mount app: mount target selector "${container}" returned null.`)
             return;
         };
         dom.innerHTML = '';
@@ -23,8 +24,7 @@ function normalizeContainer(
     container: Element | ShadowRoot | string
   ): Element | null {
     if (isString(container)) {
-      const res = document.querySelector(container)
-      return res
+      return document.querySelector(container)
     }
     return container as any
 }
