@@ -1,6 +1,8 @@
 import {
-    createRenderer
+    createRenderer,
+    h
 } from '../runtime-core';
+
 import {
     isString
 } from '../shared'
@@ -30,5 +32,6 @@ function normalizeContainer(
 }
 
 export {
+    h,
     createApp
 }

@@ -1,11 +1,16 @@
 import {
-    RootRenderFunction
+    RootRenderFunction,
+    VNode
 } from '../shared/svu';
+
+import {
+    createVnode
+} from './vnode';
 
 const createRenderer = (options?: object) => {
 
-    const render = ()=>{
-
+    const render: RootRenderFunction = (vnode, container)=>{
+        console.log(vnode, container)
     }
 
     return {
@@ -13,19 +18,25 @@ const createRenderer = (options?: object) => {
     }
 }
 
-function createAppAPI(
+function createAppAPI<HostElement>(
     render: RootRenderFunction
 ){
-    return function createApp(root: object){
+    return function createApp(root: string){
         const app = {
-            mount(container: Element | ShadowRoot | string){
-                console.log(container)
+            mount(container: HostElement){
+                // 第一步创建vnode
+                let vnode = createVnode(root, null);
+                // 第二步 执行渲染
+                render(vnode, container);
             }
         }
         return app;
     }
 }
 
+const h = (type: any, props?: any, children?: any): VNode => createVnode(type, props, children);
+
 export {
-    createRenderer
+    createRenderer,
+    h
 }
