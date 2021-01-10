@@ -4,7 +4,8 @@ import {
     PatchFn,
     ShapeFlags,
     ComponentFn,
-    ComponentInstance
+    ComponentInstance,
+    SetupRenderEffectFn
 } from '../shared/svu';
 
 import {
@@ -14,7 +15,13 @@ import {
 import {
     createComponentInstance,
     setupComponent
-} from './component'
+} from './component';
+
+import {
+    renderComponentRoot
+} from './componentRenderUtils'
+
+import { effect } from '../reactivity'
 
 const createRenderer = (options?: object) => {
 
@@ -57,6 +64,32 @@ const createRenderer = (options?: object) => {
 
         // 初始化组件
         setupComponent(instance);
+
+        //渲染组件
+        setupRenderEffect(
+            instance,
+            initialVNode,
+            container
+        )
+    }
+
+    const setupRenderEffect: SetupRenderEffectFn = (
+        instance,
+        initialVNode,
+        container
+    ) => {
+        // 等待更新时使用
+        instance.update = effect(() => {
+            if(!instance.isMounted){
+                // 初始加载
+                const subTree = (instance.subTree = renderComponentRoot(instance))
+                instance.isMounted = true;
+            }else{
+                // 数据更新
+            }
+        },{
+            scheduler: () => {}
+        })
     }
 
     const render: RootRenderFunction = (vnode, container)=>{

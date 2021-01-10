@@ -12,6 +12,8 @@ export function createComponentInstance(vnode: VNode){
     const instance: ComponentInstance = {
         vnode,
         type: vnode.type,
+        subTree: null!,
+        update: null!,
         proxy: null,
         render: null,
         effects: null,

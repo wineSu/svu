@@ -116,6 +116,12 @@ export type PatchFn = (
   container: RendererElement,
 ) => void
 
+export type SetupRenderEffectFn = (
+  instance: ComponentInstance,
+  initialVNode: VNode,
+  container: RendererElement,
+) => void
+
 export type ComponentFn = (
   initialVNode: VNode,
   container: RendererElement,
@@ -124,10 +130,11 @@ export type ComponentFn = (
 export interface ComponentInstance {
   type: any
   vnode: VNode
-  /**
-   * The render function that returns vdom tree.
-   * @internal
-   */
+  // 存储旧节点
+  subTree: VNode
+  // reactive effect for rendering and patching the component
+  update: ReactiveEffect
+  // The render function that returns vdom tree.
   render: any
   /**
    * Tracking reactive effects (e.g. watchers) associated with this component
