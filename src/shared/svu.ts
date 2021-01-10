@@ -50,7 +50,7 @@ export interface RendererNode {
 export interface RendererElement extends RendererNode {}
 
 export type RootRenderFunction<HostElement = RendererElement> = (
-    vnode: VNode | null,
+    vnode: VNode,
     container: HostElement
 ) => void
 
@@ -81,6 +81,7 @@ export interface VNode<
   props: ExtraProps | null
   key: string | number | null
   children: VNodeNormalizedChildren
+  component: ComponentInstance | null
 
   // DOM
   el: HostNode | null
@@ -105,4 +106,43 @@ export const enum ShapeFlags {
     COMPONENT_SHOULD_KEEP_ALIVE = 1 << 8,
     COMPONENT_KEPT_ALIVE = 1 << 9,
     COMPONENT = ShapeFlags.STATEFUL_COMPONENT | ShapeFlags.FUNCTIONAL_COMPONENT
+}
+
+export type Data = Record<string, unknown>
+
+export type PatchFn = (
+  n1: VNode | null, // null means this is a mount
+  n2: VNode,
+  container: RendererElement,
+) => void
+
+export type ComponentFn = (
+  initialVNode: VNode,
+  container: RendererElement,
+) => void
+
+export interface ComponentInstance {
+  type: any
+  vnode: VNode
+  /**
+   * The render function that returns vdom tree.
+   * @internal
+   */
+  render: any
+  /**
+   * Tracking reactive effects (e.g. watchers) associated with this component
+   * so that they can be automatically stopped on component unmount
+   * @internal
+   */
+  effects: ReactiveEffect[] | null
+  // main proxy that serves as the public instance (`this`)
+  proxy: any
+
+  // state
+  props: Data
+
+  setupState: Data
+
+  // lifecycle
+  isMounted: boolean
 }

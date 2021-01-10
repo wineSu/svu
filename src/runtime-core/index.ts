@@ -1,16 +1,66 @@
 import {
     RootRenderFunction,
-    VNode
+    VNode,
+    PatchFn,
+    ShapeFlags,
+    ComponentFn,
+    ComponentInstance
 } from '../shared/svu';
 
 import {
     createVnode
 } from './vnode';
 
+import {
+    createComponentInstance,
+    setupComponent
+} from './component'
+
 const createRenderer = (options?: object) => {
 
+    // 不同类型分发处理
+    const patch: PatchFn = (n1, n2, container) => {
+        let { shapeFlag } = n2;
+
+        if (shapeFlag & ShapeFlags.ELEMENT) {
+            processElement(n1, n2, container)
+        } else if (shapeFlag & ShapeFlags.COMPONENT) {
+            processComponent(n1, n2, container)
+        }
+    }
+
+    // 节点渲染
+    const processElement: PatchFn = (n1, n2, container) => {
+        if (n1 == null) {
+          // 初始加载
+        } else {
+          // 更新
+        }
+    }
+
+    // 组件渲染
+    const processComponent: PatchFn = (n1, n2, container) => {
+        if (n1 == null) {
+            // 加载
+            mountComponent( n2, container )
+        } else {
+            // 更新
+        }
+    }
+
+    // 组件加载
+    const mountComponent: ComponentFn = (initialVNode, container) => {
+        // 创建实例
+        const instance: ComponentInstance = (
+            initialVNode.component = createComponentInstance(initialVNode)
+        );
+
+        // 初始化组件
+        setupComponent(instance);
+    }
+
     const render: RootRenderFunction = (vnode, container)=>{
-        console.log(vnode, container)
+        patch(null, vnode, container)
     }
 
     return {
@@ -22,10 +72,11 @@ function createAppAPI<HostElement>(
     render: RootRenderFunction
 ){
     return function createApp(root: string){
+
         const app = {
             mount(container: HostElement){
                 // 第一步创建vnode
-                let vnode = createVnode(root, null);
+                let vnode = createVnode(root);
                 // 第二步 执行渲染
                 render(vnode, container);
             }

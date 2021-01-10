@@ -7,7 +7,7 @@ import {
     isString
 } from '../shared'
 
-const createApp = (root: object) => {
+const createApp = (root: string) => {
     const app = createRenderer().createApp(root);
     const { mount } = app;
     app.mount = (container: Element | ShadowRoot | string)=>{
