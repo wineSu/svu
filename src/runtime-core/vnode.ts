@@ -12,11 +12,17 @@ import {
     isArray
 } from '../shared';
 
+// 节点类型
+export const Fragment = Symbol('Fragment');
+export const Text = Symbol('Text')
+export const Comment = Symbol('Comment')
+export const Static = Symbol('Static')
+
 /**
  * 创建 vnode
  */
 const createVnode = (
-    type: string,
+    type: string | symbol,
     props?: any,
     children: unknown = null,
     patchFlag: number = 0,
@@ -53,14 +59,15 @@ const createVnode = (
 }
 
 function normalizeChildren(vnode: VNode, children: unknown){
-    let type: number = 0;
+    let type = 0;
     if (isArray(children)) { 
-        type |= ShapeFlags.ARRAY_CHILDREN // 16 
-    } else if (isString(children)) {
-        type |= ShapeFlags.TEXT_CHILDREN // 8
+        type = ShapeFlags.ARRAY_CHILDREN // 16 
     } else if (isFunction(children)) {
         children = { default: children }
         type = ShapeFlags.SLOTS_CHILDREN
+    }else{
+        children = String(children)
+        type = ShapeFlags.TEXT_CHILDREN
     }
     vnode.shapeFlag |= type;
     vnode.children = children as VNodeNormalizedChildren;

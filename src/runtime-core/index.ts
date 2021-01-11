@@ -83,9 +83,10 @@ const createRenderer = (options?: object) => {
             if(!instance.isMounted){
                 // 初始加载
                 const subTree = (instance.subTree = renderComponentRoot(instance))
+                patch(null, subTree, container);
                 instance.isMounted = true;
             }else{
-                // 数据更新
+                // 数据更新 diff
             }
         },{
             scheduler: () => {}

@@ -66,6 +66,8 @@ type VNodeChildAtom =
 
 export type VNodeArrayChildren = Array<VNodeArrayChildren | VNodeChildAtom>
 
+export type VNodeChild = VNodeChildAtom | VNodeArrayChildren
+
 export type VNodeNormalizedChildren =
   | string
   | VNodeArrayChildren
