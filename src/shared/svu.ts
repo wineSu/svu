@@ -120,7 +120,6 @@ export type PatchFn = (
 
 export type SetupRenderEffectFn = (
   instance: ComponentInstance,
-  initialVNode: VNode,
   container: RendererElement,
 ) => void
 

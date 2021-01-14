@@ -23,6 +23,7 @@ import {
 
 import { effect } from '../reactivity'
 
+// TODO 1.组件更新  2元素加载  元素更新  3渲染组件的更新
 const createRenderer = (options?: object) => {
 
     // 不同类型分发处理
@@ -51,7 +52,7 @@ const createRenderer = (options?: object) => {
             // 加载
             mountComponent( n2, container )
         } else {
-            // 更新
+            // 更新 instance update
         }
     }
 
@@ -68,14 +69,12 @@ const createRenderer = (options?: object) => {
         //渲染组件
         setupRenderEffect(
             instance,
-            initialVNode,
             container
         )
     }
 
     const setupRenderEffect: SetupRenderEffectFn = (
         instance,
-        initialVNode,
         container
     ) => {
         // 等待更新时使用
@@ -86,7 +85,12 @@ const createRenderer = (options?: object) => {
                 patch(null, subTree, container);
                 instance.isMounted = true;
             }else{
-                // 数据更新 diff
+                // 数据更新 前后树对比 继续patch
+                const nextTree = renderComponentRoot(instance);
+                const prevTree = instance.subTree;
+                // 更换
+                instance.subTree = nextTree;
+                patch(prevTree, nextTree, prevTree.el);
             }
         },{
             scheduler: () => {}
