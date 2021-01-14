@@ -131,6 +131,7 @@ export type ComponentFn = (
 export interface ComponentInstance {
   type: any
   vnode: VNode
+  next: VNode | null
   // 存储旧节点
   subTree: VNode
   // reactive effect for rendering and patching the component
@@ -153,4 +154,27 @@ export interface ComponentInstance {
 
   // lifecycle
   isMounted: boolean
+}
+
+// 节点操作接口
+export interface RendererOptions<
+  HostNode = RendererNode,
+  HostElement = RendererElement
+> {
+  insert(el: HostNode, parent: HostElement, anchor?: HostNode | null): void
+  remove(el: HostNode): void
+  createElement(
+    type: string,
+    isSVG?: boolean,
+    isCustomizedBuiltIn?: string
+  ): HostElement
+  createText(text: string): HostNode
+  createComment(text: string): HostNode
+  setText(node: HostNode, text: string): void
+  setElementText(node: HostElement, text: string): void
+  parentNode(node: HostNode): HostElement | null
+  nextSibling(node: HostNode): HostNode | null
+  querySelector?(selector: string): HostElement | null
+  setScopeId?(el: HostElement, id: string): void
+  cloneNode?(node: HostNode): HostNode
 }

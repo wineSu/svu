@@ -12,6 +12,7 @@ export function createComponentInstance(vnode: VNode){
     const instance: ComponentInstance = {
         vnode,
         type: vnode.type,
+        next: null,
         subTree: null!,
         update: null!,
         proxy: null,

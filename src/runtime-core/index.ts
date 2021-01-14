@@ -5,7 +5,10 @@ import {
     ShapeFlags,
     ComponentFn,
     ComponentInstance,
-    SetupRenderEffectFn
+    SetupRenderEffectFn,
+    RendererElement,
+    RendererOptions,
+    RendererNode
 } from '../shared/svu';
 
 import {
@@ -18,13 +21,31 @@ import {
 } from './component';
 
 import {
-    renderComponentRoot
+    renderComponentRoot,
+    normalizeVNode
 } from './componentRenderUtils'
 
 import { effect } from '../reactivity'
 
-// TODO 1.组件更新  2元素加载  元素更新  3渲染组件的更新
-const createRenderer = (options?: object) => {
+// TODO 元素加载  元素更新
+function createRenderer<
+  HostNode = RendererNode,
+  HostElement = RendererElement
+>(options: RendererOptions<HostNode, HostElement>) {
+
+    const {
+        insert: hostInsert,
+        remove: hostRemove,
+        createElement: hostCreateElement,
+        createText: hostCreateText,
+        createComment: hostCreateComment,
+        setText: hostSetText,
+        setElementText: hostSetElementText,
+        parentNode: hostParentNode,
+        nextSibling: hostNextSibling,
+        setScopeId: hostSetScopeId = () => {},
+        cloneNode: hostCloneNode,
+      } = options;
 
     // 不同类型分发处理
     const patch: PatchFn = (n1, n2, container) => {
@@ -40,10 +61,57 @@ const createRenderer = (options?: object) => {
     // 节点渲染
     const processElement: PatchFn = (n1, n2, container) => {
         if (n1 == null) {
-          // 初始加载
+            // 初始加载
+            mountElement(n2, container);
         } else {
-          // 更新
+            // 更新
+            patchElement(n1, n2)
         }
+    }
+
+    // 元素初始加载
+    const mountElement = (
+        vnode: VNode,
+        container: RendererElement,
+    ) => {
+        const {
+            shapeFlag
+        } = vnode;
+
+        // 1 创建外层
+        let el: HostElement;
+        el = vnode.el = hostCreateElement(vnode.type);
+
+        // 2 文本或者子节点
+        if(shapeFlag & ShapeFlags.TEXT_CHILDREN){
+            hostSetElementText(el, vnode.children as string)
+        }else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
+            mountChildren(vnode.children, el)
+        }
+ 
+        // 3 属性操作
+        
+        // 4 插入
+    }
+
+    // 加载数组类型子节点
+    const mountChildren = (
+        children: any,
+        container: RendererElement,
+        start = 0
+    ) => {
+        for (let i = start; i < children.length; i++) {
+            const child = (children[i] = normalizeVNode(children[i]));
+            patch(null, child, container)
+        }
+    }
+
+    // 元素更新
+    const patchElement = (
+        n1: VNode,
+        n2: VNode
+    ) => {
+
     }
 
     // 组件渲染
@@ -53,6 +121,9 @@ const createRenderer = (options?: object) => {
             mountComponent( n2, container )
         } else {
             // 更新 instance update
+            const instance = (n2.component = n1.component)!
+            instance.next = n2
+            instance.update()
         }
     }
 
@@ -90,7 +161,7 @@ const createRenderer = (options?: object) => {
                 const prevTree = instance.subTree;
                 // 更换
                 instance.subTree = nextTree;
-                patch(prevTree, nextTree, prevTree.el);
+                patch(prevTree, nextTree, prevTree.el!);
             }
         },{
             scheduler: () => {}

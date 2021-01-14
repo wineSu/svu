@@ -2,13 +2,15 @@ import {
     createRenderer,
     h
 } from '../runtime-core';
-
+import {
+    nodeOps
+} from './nodeOps';
 import {
     isString
 } from '../shared'
 
 const createApp = (root: string) => {
-    const app = createRenderer().createApp(root);
+    const app = createRenderer(nodeOps).createApp(root);
     const { mount } = app;
     app.mount = (container: Element | ShadowRoot | string)=>{
         let dom: Element | null = normalizeContainer(container);

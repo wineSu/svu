@@ -15,7 +15,9 @@ import {
     isArray
 } from '../shared'
 
-export function renderComponentRoot(instance: ComponentInstance){
+export function renderComponentRoot(
+    instance: ComponentInstance
+): VNode{
     const {
         render
     } = instance;
@@ -24,15 +26,15 @@ export function renderComponentRoot(instance: ComponentInstance){
 
 export function normalizeVNode(child: VNodeChild): VNode {
     if (child == null || typeof child === 'boolean') {
-      // empty placeholder
-      return createVnode(Comment)
+        // empty placeholder
+        return createVnode(Comment)
     } else if (isArray(child)) {
-      // fragment
-      return createVnode(Fragment, null, child)
+        // fragment
+        return createVnode(Fragment, null, child)
     } else if (typeof child === 'object') {
-      return child
+        return child
     } else {
-      // strings and numbers
-      return createVnode(Text, null, String(child))
+        // strings and numbers
+        return createVnode(Text, null, String(child))
     }
 }
