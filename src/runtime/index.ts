@@ -6,11 +6,17 @@ import {
     nodeOps
 } from './nodeOps';
 import {
-    isString
-} from '../shared'
+    isString,
+    extend
+} from '../shared';
+import { 
+    patchProp
+} from './patchProp';
+
+const rendererOptions = Object.assign({ patchProp }, nodeOps)
 
 const createApp = (root: string) => {
-    const app = createRenderer(nodeOps).createApp(root);
+    const app = createRenderer(rendererOptions).createApp(root);
     const { mount } = app;
     app.mount = (container: Element | ShadowRoot | string)=>{
         let dom: Element | null = normalizeContainer(container);

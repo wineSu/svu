@@ -27,7 +27,7 @@ import {
 
 import { effect } from '../reactivity'
 
-// TODO 元素加载  元素更新
+// TODO 元素加载  元素更新diff  调度异步更新  
 function createRenderer<
   HostNode = RendererNode,
   HostElement = RendererElement
@@ -36,6 +36,7 @@ function createRenderer<
     const {
         insert: hostInsert,
         remove: hostRemove,
+        patchProp: hostPatchProp,
         createElement: hostCreateElement,
         createText: hostCreateText,
         createComment: hostCreateComment,
@@ -75,7 +76,8 @@ function createRenderer<
         container: RendererElement,
     ) => {
         const {
-            shapeFlag
+            shapeFlag,
+            props
         } = vnode;
 
         // 1 创建外层
@@ -90,8 +92,19 @@ function createRenderer<
         }
  
         // 3 属性操作
-        
+        if(props){
+            for(const key in props){
+                hostPatchProp(
+                    el,
+                    key,
+                    null,
+                    props[key],
+                )
+            }
+        }
+
         // 4 插入
+        hostInsert(el, container)
     }
 
     // 加载数组类型子节点

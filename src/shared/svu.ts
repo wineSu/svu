@@ -161,8 +161,14 @@ export interface RendererOptions<
   HostNode = RendererNode,
   HostElement = RendererElement
 > {
-  insert(el: HostNode, parent: HostElement, anchor?: HostNode | null): void
+  insert(el: HostElement, parent: RendererElement, anchor?: HostNode | null): void
   remove(el: HostNode): void
+  patchProp(
+    el: HostElement,
+    key: string,
+    prevValue: any,
+    nextValue: any,
+  ): void
   createElement(
     type: string,
     isSVG?: boolean,
@@ -178,3 +184,7 @@ export interface RendererOptions<
   setScopeId?(el: HostElement, id: string): void
   cloneNode?(node: HostNode): HostNode
 }
+
+export type DOMRenderOptions = RendererOptions<Node, Element> 
+
+export type Style = string | Record<string, string> | null

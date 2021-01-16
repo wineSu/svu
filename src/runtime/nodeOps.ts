@@ -4,7 +4,7 @@ import {
 
 const doc = (typeof document !== 'undefined' ? document : null) as Document
 
-export const nodeOps: RendererOptions<Node, Element> = {
+export const nodeOps:Omit< RendererOptions<Node, Element>, 'patchProp' >= {
   insert: (child, parent, anchor) => {
     parent.insertBefore(child, anchor || null)
   },
