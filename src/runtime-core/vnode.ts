@@ -34,7 +34,7 @@ const createVnode = (
                 ? ShapeFlags.STATEFUL_COMPONENT
                     : isFunction(type)
                         ? ShapeFlags.FUNCTIONAL_COMPONENT
-                            : 0
+                            : 0;
     const vnode: VNode = {
         [ReactiveFlags.SKIP]: true,
         type,
@@ -69,8 +69,8 @@ function normalizeChildren(vnode: VNode, children: unknown){
         children = String(children)
         type = ShapeFlags.TEXT_CHILDREN
     }
-    vnode.shapeFlag |= type;
     vnode.children = children as VNodeNormalizedChildren;
+    vnode.shapeFlag |= type;
 }
 
 export {

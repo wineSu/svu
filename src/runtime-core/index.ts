@@ -12,7 +12,8 @@ import {
 } from '../shared/svu';
 
 import {
-    createVnode
+    createVnode,
+    Text
 } from './vnode';
 
 import {
@@ -27,7 +28,7 @@ import {
 
 import { effect } from '../reactivity'
 
-// TODO 元素加载  元素更新diff  调度异步更新  
+// TODO 元素更新diff  调度异步更新  
 function createRenderer<
   HostNode = RendererNode,
   HostElement = RendererElement
@@ -46,16 +47,37 @@ function createRenderer<
         nextSibling: hostNextSibling,
         setScopeId: hostSetScopeId = () => {},
         cloneNode: hostCloneNode,
-      } = options;
+    } = options;
 
     // 不同类型分发处理
     const patch: PatchFn = (n1, n2, container) => {
-        let { shapeFlag } = n2;
+        let { shapeFlag, type } = n2;
+        // 某节点中是一个 [string, string]
+        switch(type){
+            case Text:
+                processText(n1, n2, container)
+            break;
+            default:
+                if (shapeFlag & ShapeFlags.ELEMENT) {
+                    processElement(n1, n2, container)
+                } else if (shapeFlag & ShapeFlags.COMPONENT) {
+                    processComponent(n1, n2, container)
+                }
+            break;
+        }
+    }
 
-        if (shapeFlag & ShapeFlags.ELEMENT) {
-            processElement(n1, n2, container)
-        } else if (shapeFlag & ShapeFlags.COMPONENT) {
-            processComponent(n1, n2, container)
+    const processText: PatchFn = (n1, n2, container) => {
+        if (n1 == null) {
+            hostInsert(
+                n2.el = hostCreateText(n2.children as string),
+                container
+            )
+        } else {
+            const el = (n2.el = n1.el!);
+            if (n2.children !== n1.children) {
+                hostSetText(el, n2.children as string)
+            }
         }
     }
 
@@ -84,7 +106,7 @@ function createRenderer<
         let el: HostElement;
         el = vnode.el = hostCreateElement(vnode.type);
 
-        // 2 文本或者子节点
+        // 2 单文本<p>1</p >或者 子节点[]
         if(shapeFlag & ShapeFlags.TEXT_CHILDREN){
             hostSetElementText(el, vnode.children as string)
         }else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
@@ -176,7 +198,7 @@ function createRenderer<
                 instance.subTree = nextTree;
                 patch(prevTree, nextTree, prevTree.el!);
             }
-        },{
+        }, {
             scheduler: () => {}
         })
     }

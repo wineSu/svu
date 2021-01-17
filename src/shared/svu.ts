@@ -161,7 +161,7 @@ export interface RendererOptions<
   HostNode = RendererNode,
   HostElement = RendererElement
 > {
-  insert(el: HostElement, parent: RendererElement, anchor?: HostNode | null): void
+  insert(el: RendererNode, parent: RendererElement, anchor?: HostNode | null): void
   remove(el: HostNode): void
   patchProp(
     el: HostElement,
@@ -176,7 +176,7 @@ export interface RendererOptions<
   ): HostElement
   createText(text: string): HostNode
   createComment(text: string): HostNode
-  setText(node: HostNode, text: string): void
+  setText(node: RendererNode, text: string): void
   setElementText(node: HostElement, text: string): void
   parentNode(node: HostNode): HostElement | null
   nextSibling(node: HostNode): HostNode | null
