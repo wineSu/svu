@@ -40,7 +40,6 @@ function createRenderer<
         patchProp: hostPatchProp,
         createElement: hostCreateElement,
         createText: hostCreateText,
-        createComment: hostCreateComment,
         setText: hostSetText,
         setElementText: hostSetElementText,
         parentNode: hostParentNode,
@@ -81,7 +80,7 @@ function createRenderer<
         }
     }
 
-    // 节点渲染
+    // 节点渲染[初始|更新]
     const processElement: PatchFn = (n1, n2, container) => {
         if (n1 == null) {
             // 初始加载
