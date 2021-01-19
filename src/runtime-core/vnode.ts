@@ -18,10 +18,63 @@ export const Text = Symbol('Text')
 export const Comment = Symbol('Comment')
 export const Static = Symbol('Static')
 
+// block start
+/**
+ * (openBlock(1),
+      createBlock('div', null, [
+        ((openBlock(2),
+        createBlock("Frag", null, [
+          222,
+          333
+        ])))
+    ]))
+    编译器会做--：
+    一种树的遍历，先按照层级顺序执行openBlock，然后再是树的完成过程（叶子节点开始）
+    openBlock1 --> openBlock2 --> Frag --> div
+ */
+export const blockStack: (VNode[] | null)[] = []
+let currentBlock: VNode[] | null = null
+
+export function openBlock(disableTracking = false) {
+  blockStack.push((currentBlock = disableTracking ? null : []))
+}
+
+export function closeBlock() {
+  blockStack.pop()
+  currentBlock = blockStack[blockStack.length - 1] || null
+}
+
+export function createBlock(
+  type: string | symbol,
+  props?: any,
+  children?: any,
+  patchFlag?: number,
+  dynamicProps?: string[]
+): VNode {
+  const vnode = createVnode(
+    type,
+    props,
+    children,
+    patchFlag,
+    dynamicProps,
+  )
+
+  vnode.dynamicChildren = currentBlock || []
+
+  closeBlock()
+
+  if (currentBlock) {
+    currentBlock.push(vnode)
+  }
+  return vnode
+}
+// block end
+
+
 /**
  * 创建 vnode
  */
-const createVnode = (
+export const createVnode = (
     type: string | symbol,
     props?: any,
     children: unknown = null,
@@ -71,8 +124,4 @@ function normalizeChildren(vnode: VNode, children: unknown){
     }
     vnode.children = children as VNodeNormalizedChildren;
     vnode.shapeFlag |= type;
-}
-
-export {
-    createVnode
 }

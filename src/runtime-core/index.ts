@@ -145,7 +145,9 @@ function createRenderer<
         n1: VNode,
         n2: VNode
     ) => {
-
+        // 属性
+        // 子元素
+        // diff 数组
     }
 
     // 组件渲染
