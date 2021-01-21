@@ -8,12 +8,20 @@ import {
     SetupRenderEffectFn,
     RendererElement,
     RendererOptions,
-    RendererNode
+    RendererNode,
+    PatchFlags,
+    Data
 } from '../shared/svu';
 
 import {
+    EMPTY_OBJ,
+    isSameVNodeType
+} from '../shared'
+
+import {
     createVnode,
-    Text
+    Text,
+    Fragment
 } from './vnode';
 
 import {
@@ -28,7 +36,7 @@ import {
 
 import { effect } from '../reactivity'
 
-// TODO 元素更新diff  调度异步更新  
+// TODO 元素更新diff  调度异步批量更新  生命周期 编译
 function createRenderer<
   HostNode = RendererNode,
   HostElement = RendererElement
@@ -145,9 +153,116 @@ function createRenderer<
         n1: VNode,
         n2: VNode
     ) => {
-        // 属性
-        // 子元素
-        // diff 数组
+        const el = (n2.el = n1.el!);
+        // 编译时生成的 patchFlag
+        let {patchFlag, dynamicChildren} = n2;
+
+        // patchFlag 和 n1.patchFlag 相同则使用相同的flag 否则取 full
+        patchFlag |= n1.patchFlag & PatchFlags.FULL_PROPS;
+
+        const oldProps = n1.props || EMPTY_OBJ;
+        const newProps = n2.props || EMPTY_OBJ;
+        
+        // 属性对比过程中的优化体现在：
+        // 动态节点的全量对比 | class | style | 其他动态属性 | 纯文本的处理 
+        // 不符合以上条件的同样是全量diff属性
+        if(patchFlag > 0){
+            // 动态属性 
+            if(patchFlag & PatchFlags.FULL_PROPS){
+                patchProps(el, n2, oldProps, newProps)
+            } else {
+                // 动态 class
+                if(patchFlag & PatchFlags.CLASS){
+                    if(oldProps.class != newProps.class){
+                        hostPatchProp(el, 'class', null, newProps.class)
+                    }
+                }
+                // 动态 style
+                if(patchFlag & PatchFlags.STYLE){
+                    hostPatchProp(el, 'style', oldProps.style, newProps.style);
+                }
+                // 动态其他属性 :s = "aa"
+                if(patchFlag & PatchFlags.PROPS){
+                    const propsToUpdate = n2.dynamicProps!;
+                    for (let i = 0, len = propsToUpdate.length; i < len; i++) {
+                        const key = propsToUpdate[i];
+                        const prev = oldProps[key];
+                        const next = newProps[key];
+                        if (next !== prev) {
+                            hostPatchProp(el, key, prev, next)
+                        }
+                    }
+                }
+            }
+            // 纯文本属性的替换 s = '1'
+            if(patchFlag & PatchFlags.TEXT){
+                if (n1.children !== n2.children) {
+                    hostSetElementText(el, n2.children as string)
+                }
+            }
+        }else{
+            patchProps(el, n2, oldProps, newProps)
+        }
+
+        // 子元素 diff 数组
+        if(dynamicChildren){
+            patchBlockChildren(n1.dynamicChildren!, dynamicChildren, el);
+        }else{
+            patchChildren(n1, n2, el);
+        }
+    }
+    
+    const patchProps = (
+        el: RendererElement,
+        vnode: VNode,
+        oldProps: Data,
+        newProps: Data,
+    ) => {
+        if(oldProps !== newProps){
+            // 前后属性不相等
+            for(let key in newProps){
+                const next = newProps[key];
+                const prev = oldProps[key];
+                if(next !== prev){
+                    hostPatchProp(el, key, prev, next);
+                }
+            }
+            // 老的有新的没有
+            for(const key in oldProps){ 
+                if(!(key in newProps)){
+                    hostPatchProp(el, key, oldProps[key], null);
+                }
+            }
+        }
+    }
+
+    const patchBlockChildren = (
+        oldChildren: VNode[],
+        newChildren: VNode[],
+        fallbackContainer: RendererElement,
+    ) => {
+        for (let i = 0, len = newChildren.length; i < len; i++) {
+            const oldVNode = oldChildren[i]
+            const newVNode = newChildren[i]
+            const container =
+              // Fragment
+              oldVNode.type === Fragment ||
+              // 不同类型节点替换 需要找到父节点
+              !isSameVNodeType(oldVNode, newVNode) ||
+              // - In the case of a component, it could contain anything.
+              oldVNode.shapeFlag & ShapeFlags.COMPONENT
+                ? hostParentNode(oldVNode.el!)! : fallbackContainer;
+
+            patch(oldVNode, newVNode, container)
+        }
+    }
+
+    const patchChildren = (
+        n1: VNode | null,
+        n2: VNode,
+        container: RendererElement,
+    ) => {
+        
     }
 
     // 组件渲染

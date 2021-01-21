@@ -164,7 +164,7 @@ export interface RendererOptions<
   insert(el: RendererNode, parent: RendererElement, anchor?: HostNode | null): void
   remove(el: HostNode): void
   patchProp(
-    el: HostElement,
+    el: RendererNode,
     key: string,
     prevValue: any,
     nextValue: any,
@@ -177,8 +177,8 @@ export interface RendererOptions<
   createText(text: string): HostNode
   createComment(text: string): HostNode
   setText(node: RendererNode, text: string): void
-  setElementText(node: HostElement, text: string): void
-  parentNode(node: HostNode): HostElement | null
+  setElementText(node: RendererNode, text: string): void
+  parentNode(node: RendererElement): HostElement | null
   nextSibling(node: HostNode): HostNode | null
   querySelector?(selector: string): HostElement | null
   setScopeId?(el: HostElement, id: string): void
@@ -188,3 +188,21 @@ export interface RendererOptions<
 export type DOMRenderOptions = RendererOptions<Node, Element> 
 
 export type Style = string | Record<string, string> | null
+
+// diff 优化
+export const enum PatchFlags {
+  TEXT = 1,
+  CLASS = 1 << 1,
+  STYLE = 1 << 2,
+  PROPS = 1 << 3,
+  FULL_PROPS = 1 << 4,
+  HYDRATE_EVENTS = 1 << 5,
+  STABLE_FRAGMENT = 1 << 6,
+  KEYED_FRAGMENT = 1 << 7,
+  UNKEYED_FRAGMENT = 1 << 8,
+  NEED_PATCH = 1 << 9,
+  DYNAMIC_SLOTS = 1 << 10,
+  DEV_ROOT_FRAGMENT = 1 << 11,
+  HOISTED = -1,
+  BAIL = -2
+}

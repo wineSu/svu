@@ -1,19 +1,20 @@
 import {
     DOMRenderOptions,
-    Style
+    Style,
+    RendererNode
 } from '../shared/svu';
 import {
     isString
 } from '../shared';
 
-function patchClass(el: Element, value: string | null) {
+function patchClass(el: RendererNode, value: string | null) {
     if (value == null) {
         value = '';
     }
     el.className = value;
 }
 
-function patchStyle(el: Element, prev: Style, next: Style) {
+function patchStyle(el: RendererNode, prev: Style, next: Style) {
     const style: CSSStyleDeclaration = (el as HTMLElement).style;
     if (!next) {
         el.removeAttribute('style');
@@ -27,7 +28,7 @@ function patchStyle(el: Element, prev: Style, next: Style) {
         }
     }
 }
-function patchAttr(el: Element, key: string, value: any) {
+function patchAttr(el: RendererNode, key: string, value: any) {
     if (value == null) {
         el.removeAttribute(key);
     } else {

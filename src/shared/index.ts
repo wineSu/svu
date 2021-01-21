@@ -13,3 +13,7 @@ export const isFunction = (val: unknown): val is Function =>
 export const isString = (val: unknown): val is string => typeof val === 'string'
 
 export const extend = Object.assign
+
+export const EMPTY_OBJ = {}
+
+export const isSameVNodeType = (n1: any, n2: any) => (n1.type === n2.type && n1.key === n2.key)
