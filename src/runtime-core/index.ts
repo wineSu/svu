@@ -10,7 +10,8 @@ import {
     RendererOptions,
     RendererNode,
     PatchFlags,
-    Data
+    Data,
+    VNodeArrayChildren
 } from '../shared/svu';
 
 import {
@@ -262,7 +263,108 @@ function createRenderer<
         n2: VNode,
         container: RendererElement,
     ) => {
+        const c1 = n1 && n1.children;
+        const prevShapeFlag = n1 ? n1.shapeFlag : 0;
+        const c2 = n2.children;
+
+        const { patchFlag, shapeFlag } = n2
+        // 1 new: text  old: array
+        // 2 new: text  old: text | null
+        // 3 new: array old: array +++++++++
+        // 4 new: null  old: array
+        // 5 new: null  old: text | null
+        // 6 new: array old: text | null
+        // 按照上述思路进行 diff
+        if(shapeFlag & ShapeFlags.TEXT_CHILDREN){
+            if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN){
+                // 卸载组件 TODO
+                container.innerHTML = '';
+            }
+            if(c2 !== c1){
+                hostSetElementText(container, c2 as string)
+            }
+        } else {
+            if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN){
+                if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
+                    // array 前后对比
+                    patchKeyedChildren(c1 as VNode[], c2 as VNodeArrayChildren, container);
+                }else{
+                    // 卸载组件 TODO
+                    container.innerHTML = '';
+                }
+            } else {
+                if(prevShapeFlag & ShapeFlags.TEXT_CHILDREN){
+                    hostSetElementText(container, '');
+                }
+                if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
+                    // 加载数组类型组件
+                    mountChildren( c2, container)
+                }
+            }
+        }
+    }
+
+    // array 子元素对比
+    const patchKeyedChildren =  (
+        c1: VNode[],
+        c2: VNodeArrayChildren,
+        container: RendererElement,
+    ) => {
+        let i = 0, l2 = c2.length,
+            e1 = c1.length - 1,
+            e2 = l2 - 1;
         
+        // (a b) c
+        // (a b) d e
+        while (i <= e1 && i <= e2) {
+            const n1 = c1[i];
+            const n2 = c2[i] = normalizeVNode(c2[i]);
+            if (isSameVNodeType(n1, n2)) {
+                patch(n1, n2, container);
+            } else {
+                break;
+            }
+            i++;
+        }
+
+        // a (b c)
+        // d e (b c)
+        while (i <= e1 && i <= e2) {
+            const n1 = c1[e1];
+            const n2 = c2[e2] = normalizeVNode(c2[e2]);
+            if (isSameVNodeType(n1, n2)) {
+                patch(n1, n2, container);
+            } else {
+                break;
+            }
+            e1--;
+            e2--;
+        }
+
+        // (a b)
+        // (a b) c
+        // i = 2, e1 = 1, e2 = 2
+        // (a b)
+        // c (a b)
+        // i = 0, e1 = -1, e2 = 0
+        if (i > e1) {
+            while (i <= e2) {
+                patch(null, c2[i] = normalizeVNode(c2[i]), container)
+                i++;
+            }
+        }
+        // (a b) c
+        // (a b)
+        // i = 2, e1 = 2, e2 = 1
+        // a (b c)
+        // (b c)
+        // i = 0, e1 = 0, e2 = -1
+        else if(i < e2){
+            while (i <= e1) {
+                hostRemove(c1[i].el as any);
+                i++;
+            }
+        }
     }
 
     // 组件渲染
