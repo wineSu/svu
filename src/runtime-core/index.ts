@@ -37,6 +37,8 @@ import {
 
 import { effect } from '../reactivity'
 
+import { getSequence } from './getSequence'
+
 // TODO 元素更新diff  调度异步批量更新  生命周期 编译
 function createRenderer<
   HostNode = RendererNode,
@@ -363,6 +365,89 @@ function createRenderer<
             while (i <= e1) {
                 hostRemove(c1[i].el as any);
                 i++;
+            }
+        }else{
+            // [i ... e1 + 1]: a b [c d e] f g
+            // [i ... e2 + 1]: a b [e d c h] f g
+            // i = 2, e1 = 4, e2 = 5
+            const s1 = i, s2 = i;
+            // 抛头去尾后 新节点 key 的集合
+            const keyToNewIndexMap: Map<string | number, number> = new Map();
+            for(i = s2; i <= e2; i++){
+                const nextChild = (c2[i] = normalizeVNode(c2[i]));
+                const key = nextChild.key;
+                if(key != null){
+                    keyToNewIndexMap.set(key, i);
+                }
+            }
+
+            let j;
+            let patched = 0, toBePatched = e2 - s2 + 1;
+            let maxNewIndexSoFar = 0, moved = false;
+            // 创建最长稳定子序列 默认 0 标示当前新节点无对应的旧节点
+            const newIndexToOldIndexMap = new Array(toBePatched).fill(0);
+
+            for(i = s1; i <= e1; i++){
+                const prevChild = c1[i];
+                // a b [c d e] f g
+                // a b [c] f g
+                if(patched >= toBePatched){
+                    hostRemove(prevChild.el as any);
+                    continue;
+                }
+                let newIndex, prevChildKey = prevChild.key;
+                // a b [c d e q(noKey)] f g
+                // a b [e c d h q(noKey)] f g
+                if(prevChildKey != null){
+                    newIndex = keyToNewIndexMap.get(prevChildKey);
+                }else{
+                    // 无 key 遍历新节点 找到相同的节点
+                    for (j = s2; j <= e2; j++) {
+                        if (
+                            newIndexToOldIndexMap[j - s2] === 0 &&
+                            isSameVNodeType(prevChild, c2[j] as VNode)
+                        ) {
+                            newIndex = j;
+                            break;
+                        }
+                    }
+                }
+                // 新节点中不存在 旧的需要移除
+                if(newIndex === undefined){
+                    hostRemove(prevChild.el as any);
+                }else{
+                    // (a b) c
+                    // (a c b)
+                    newIndexToOldIndexMap[newIndex - s2] = i + 1;
+                    if (newIndex >= maxNewIndexSoFar) {
+                        maxNewIndexSoFar = newIndex;
+                    } else {
+                        moved = true;
+                    }
+                    patch(prevChild, c2[newIndex] as VNode, container);
+                    patched++;
+                }
+            }
+
+            // 最长递增子序列（不需要做移动的节点）
+            const increasingNewIndexSequence = moved
+                    ? getSequence(newIndexToOldIndexMap)
+                    : [];
+            j = increasingNewIndexSequence.length - 1;
+            for (i = toBePatched - 1; i >= 0; i--) {
+                const nextIndex = s2 + i;
+                const nextChild = c2[nextIndex] as VNode;
+                const anchor = nextIndex + 1 < l2 ? (c2[nextIndex + 1] as VNode).el : null;
+                if (newIndexToOldIndexMap[i] === 0) {
+                    // mount new
+                    patch(null, nextChild, container)
+                } else if (moved) {
+                    if (j < 0 || i !== increasingNewIndexSequence[j]) {
+                        hostInsert(nextChild, container, anchor)
+                    } else {
+                        j--;
+                    }
+                }
             }
         }
     }
