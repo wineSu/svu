@@ -18,20 +18,63 @@
     } = Vue;
 
     const App = {
+        // setup() {
+        //     const state = reactive({ 
+        //         count: '0',
+        //         msg: 'this is my frist renderVue' 
+        //     })
+        //     return () => {
+        //         return h('div', {
+        //             style: {
+        //                 color: 'blink',
+        //                 fontSize: '20px',
+        //                 height: '100px',
+        //                 background: 'gray'
+        //             }
+        //         }, [`${state.count}--${state.msg}`, 111111111])
+        //     }
+        // }
+        // setup() {
+        //     const state = reactive({ flag: true, count: '0', });
+        //     setTimeout(() => {
+        //         // 测试批量更新
+        //         state.flag = false;
+        //         state.count = 100;
+        //         state.count = 200;
+        //     }, 1000);
+        //     return () => {
+        //         return state.flag ?
+        //             h('div', { style: { color: 'red' } }, `${state.count}--hello`) :
+        //             h('p', { style: { color: 'blue' } }, `${state.count}--word`)
+        //     }
+        // }
         setup() {
-            const state = reactive({ 
-                count: '0',
-                msg: 'this is my frist renderVue' 
-            })
+            const state = reactive({ flag: true, count: '0', });
+            setTimeout(() => {
+                // 测试diff
+                state.flag = false;
+            }, 3000);
             return () => {
-                return h('div', {
-                    style: {
-                        color: 'blink',
-                        fontSize: '20px',
-                        height: '100px',
-                        background: 'gray'
-                    }
-                }, [`${state.count}--${state.msg}`, 111111111])
+                return state.flag ?
+                    h('div', { style: { color: 'red' } }, [
+                        h("p", { key: "a" }, "1"),
+                        h("p", { key: "b" }, "2"),
+                        h("p", { key: "c" }, "3"),
+                        h("p", { key: "d" }, "4"),
+                        h("p", { key: "e" }, "5"),
+                        h("p", { key: "f" }, "6"),
+                        h("p", { key: "g" }, "7"),
+                    ]) :
+                    h('div', { style: { color: 'blue' } }, [
+                        h("p", { key: "a" }, "111"),
+                        h("p", { key: "b" }, "222"),
+                        h("p", { key: "e" }, "333"),
+                        h("p", { key: "c" }, "444"),
+                        h("p", { key: "d" }, "555"),
+                        h("p", { key: "h" }, "666"),
+                        h("p", { key: "f" }, "777"),
+                        h("p", { key: "g" }, "888"),
+                    ])
             }
         }
     }

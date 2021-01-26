@@ -39,7 +39,7 @@ import { effect } from '../reactivity'
 
 import { getSequence } from './getSequence'
 
-// TODO 元素更新diff  调度异步批量更新  生命周期 编译
+// TODO diff调试测试-- 调度异步批量更新--  生命周期 -- 编译 --源码输出文章
 function createRenderer<
   HostNode = RendererNode,
   HostElement = RendererElement
@@ -61,6 +61,11 @@ function createRenderer<
 
     // 不同类型分发处理
     const patch: PatchFn = (n1, n2, container) => {
+        // 类型不一致直接删掉旧的
+        if (n1 && !isSameVNodeType(n1, n2)) {
+            hostRemove(n1.el as any);
+            n1 = null;
+        }
         let { shapeFlag, type } = n2;
         // 某节点中是一个 [string, string]
         switch(type){
@@ -499,10 +504,8 @@ function createRenderer<
                 const prevTree = instance.subTree;
                 // 更换
                 instance.subTree = nextTree;
-                patch(prevTree, nextTree, prevTree.el!);
+                patch(prevTree, nextTree, hostParentNode(prevTree.el!)!);
             }
-        }, {
-            scheduler: () => {}
         })
     }
 
