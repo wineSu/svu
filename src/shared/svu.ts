@@ -116,6 +116,7 @@ export type PatchFn = (
   n1: VNode | null, // null means this is a mount
   n2: VNode,
   container: RendererElement,
+  anchor?: RendererNode | null,
 ) => void
 
 export type SetupRenderEffectFn = (

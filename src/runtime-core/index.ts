@@ -60,7 +60,7 @@ function createRenderer<
     } = options;
 
     // 不同类型分发处理
-    const patch: PatchFn = (n1, n2, container) => {
+    const patch: PatchFn = (n1, n2, container, anchor) => {
         // 类型不一致直接删掉旧的
         if (n1 && !isSameVNodeType(n1, n2)) {
             hostRemove(n1.el as any);
@@ -74,7 +74,7 @@ function createRenderer<
             break;
             default:
                 if (shapeFlag & ShapeFlags.ELEMENT) {
-                    processElement(n1, n2, container)
+                    processElement(n1, n2, container, anchor)
                 } else if (shapeFlag & ShapeFlags.COMPONENT) {
                     processComponent(n1, n2, container)
                 }
@@ -97,10 +97,10 @@ function createRenderer<
     }
 
     // 节点渲染[初始|更新]
-    const processElement: PatchFn = (n1, n2, container) => {
+    const processElement: PatchFn = (n1, n2, container, anchor) => {
         if (n1 == null) {
             // 初始加载
-            mountElement(n2, container);
+            mountElement(n2, container, anchor);
         } else {
             // 更新
             patchElement(n1, n2)
@@ -111,6 +111,7 @@ function createRenderer<
     const mountElement = (
         vnode: VNode,
         container: RendererElement,
+        anchor?: RendererNode | null
     ) => {
         const {
             shapeFlag,
@@ -141,7 +142,7 @@ function createRenderer<
         }
 
         // 4 插入
-        hostInsert(el, container)
+        hostInsert(el, container, anchor)
     }
 
     // 加载数组类型子节点
@@ -366,7 +367,7 @@ function createRenderer<
         // a (b c)
         // (b c)
         // i = 0, e1 = 0, e2 = -1
-        else if(i < e2){
+        else if(i > e2){
             while (i <= e1) {
                 hostRemove(c1[i].el as any);
                 i++;
@@ -445,10 +446,10 @@ function createRenderer<
                 const anchor = nextIndex + 1 < l2 ? (c2[nextIndex + 1] as VNode).el : null;
                 if (newIndexToOldIndexMap[i] === 0) {
                     // mount new
-                    patch(null, nextChild, container)
+                    patch(null, nextChild, container, anchor)
                 } else if (moved) {
                     if (j < 0 || i !== increasingNewIndexSequence[j]) {
-                        hostInsert(nextChild, container, anchor)
+                        hostInsert(nextChild.el!, container, anchor)
                     } else {
                         j--;
                     }
