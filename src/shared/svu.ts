@@ -207,3 +207,10 @@ export const enum PatchFlags {
   HOISTED = -1,
   BAIL = -2
 }
+
+// SchedulerJob
+export interface SchedulerJob {
+  (): void
+  id?: number
+  allowRecurse?: boolean
+}

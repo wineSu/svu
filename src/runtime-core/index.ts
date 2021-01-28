@@ -12,7 +12,7 @@ import {
     PatchFlags,
     Data,
     VNodeArrayChildren
-} from '../shared/svu';
+} from '../shared/svu'
 
 import {
     EMPTY_OBJ,
@@ -23,12 +23,12 @@ import {
     createVnode,
     Text,
     Fragment
-} from './vnode';
+} from './vnode'
 
 import {
     createComponentInstance,
     setupComponent
-} from './component';
+} from './component'
 
 import {
     renderComponentRoot,
@@ -39,7 +39,9 @@ import { effect } from '../reactivity'
 
 import { getSequence } from './getSequence'
 
-// TODO diff调试测试-- 调度异步批量更新--  生命周期 -- 编译 --源码输出文章
+import { queueJob } from './scheduler';
+
+// TODO 生命周期 -- 编译 --源码输出文章
 function createRenderer<
   HostNode = RendererNode,
   HostElement = RendererElement
@@ -506,6 +508,10 @@ function createRenderer<
                 // 更换
                 instance.subTree = nextTree;
                 patch(prevTree, nextTree, hostParentNode(prevTree.el!)!);
+            }
+        },{
+            scheduler: job => {
+                queueJob(job);
             }
         })
     }
