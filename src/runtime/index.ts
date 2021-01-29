@@ -2,16 +2,27 @@ import {
     createRenderer,
     h
 } from '../runtime-core';
+
 import {
     nodeOps
 } from './nodeOps';
+
 import {
     isString,
-    extend
 } from '../shared';
+
 import { 
     patchProp
 } from './patchProp';
+
+import {
+    onBeforeMount,
+    onMounted,
+    onBeforeUpdate,
+    onUpdated,
+    onBeforeUnmount,
+    onUnmounted
+} from '../runtime-core/apiLifecycle'
 
 const rendererOptions = Object.assign({ patchProp }, nodeOps)
 
@@ -41,5 +52,11 @@ function normalizeContainer(
 
 export {
     h,
-    createApp
+    createApp,
+    onBeforeMount,
+    onMounted,
+    onBeforeUpdate,
+    onUpdated,
+    onBeforeUnmount,
+    onUnmounted
 }

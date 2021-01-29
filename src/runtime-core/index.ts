@@ -16,7 +16,8 @@ import {
 
 import {
     EMPTY_OBJ,
-    isSameVNodeType
+    isSameVNodeType,
+    invokeArrayFns
 } from '../shared'
 
 import {
@@ -39,7 +40,10 @@ import { effect } from '../reactivity'
 
 import { getSequence } from './getSequence'
 
-import { queueJob } from './scheduler';
+import {
+    queueJob,
+    queuePostRenderEffect
+} from './scheduler'
 
 // TODO 生命周期 -- 编译 --源码输出文章
 function createRenderer<
@@ -497,17 +501,32 @@ function createRenderer<
         // 等待更新时使用
         instance.update = effect(() => {
             if(!instance.isMounted){
+                let { bm, m } = instance;
+                // Life onBeforeMount
+                bm && invokeArrayFns(bm);
+
                 // 初始加载
                 const subTree = (instance.subTree = renderComponentRoot(instance))
                 patch(null, subTree, container);
+
+                // Life onMounted
+                m && queuePostRenderEffect(m);
+
                 instance.isMounted = true;
             }else{
+                const { bu, u } = instance;
+                // Life onBeforeUpdate
+                bu && invokeArrayFns(bu);
+
                 // 数据更新 前后树对比 继续patch
                 const nextTree = renderComponentRoot(instance);
                 const prevTree = instance.subTree;
                 // 更换
                 instance.subTree = nextTree;
                 patch(prevTree, nextTree, hostParentNode(prevTree.el!)!);
+
+                // Life onUpdated
+                u && queuePostRenderEffect(u);
             }
         },{
             scheduler: job => {

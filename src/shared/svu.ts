@@ -155,6 +155,28 @@ export interface ComponentInstance {
 
   // lifecycle
   isMounted: boolean
+
+  [LifecycleHooks.BEFORE_MOUNT]: LifecycleHook
+  /**
+   * @internal
+   */
+  [LifecycleHooks.MOUNTED]: LifecycleHook
+  /**
+   * @internal
+   */
+  [LifecycleHooks.BEFORE_UPDATE]: LifecycleHook
+  /**
+   * @internal
+   */
+  [LifecycleHooks.UPDATED]: LifecycleHook
+  /**
+   * @internal
+   */
+  [LifecycleHooks.BEFORE_UNMOUNT]: LifecycleHook
+  /**
+   * @internal
+   */
+  [LifecycleHooks.UNMOUNTED]: LifecycleHook
 }
 
 // 节点操作接口
@@ -213,4 +235,21 @@ export interface SchedulerJob {
   (): void
   id?: number
   allowRecurse?: boolean
+}
+
+// life cycle hooks
+export const enum LifecycleHooks {
+  BEFORE_MOUNT = 'bm',
+  MOUNTED = 'm',
+  BEFORE_UPDATE = 'bu',
+  UPDATED = 'u',
+  BEFORE_UNMOUNT = 'bum',
+  UNMOUNTED = 'um',
+}
+
+type LifecycleHook = Function[] | null
+
+export interface CreateHook {
+  (lifecycle: LifecycleHooks): 
+    <T extends Function = () => any>(hook: T, target: ComponentInstance | null) => void
 }

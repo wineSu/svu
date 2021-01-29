@@ -8,6 +8,9 @@ import {
     isObject
 } from '../shared';
 
+// 组件实例 生命周期使用
+export let currentInstance: ComponentInstance | null = null;
+
 export function createComponentInstance(vnode: VNode){
     const instance: ComponentInstance = {
         vnode,
@@ -21,8 +24,14 @@ export function createComponentInstance(vnode: VNode){
 
         props: {},
         setupState: {},
-
-        isMounted: false
+        
+        isMounted: false,
+        bm: null,
+        m: null,
+        bu: null,
+        u: null,
+        um: null,
+        bum: null,
     }
     return instance;
 }
@@ -32,7 +41,9 @@ export function setupComponent(instance: ComponentInstance){
     const Component = instance.type;
     const { setup } = Component;
     if(setup){
+        currentInstance = instance;
         const setupResult = setup();
+        currentInstance = null;
         handleSetupResult(instance, setupResult);
     }
 }

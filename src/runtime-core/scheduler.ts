@@ -4,8 +4,12 @@ import {
 
 /**
  * 批量更新
+ * life 标识为生命周期的控制
  */
 const queue: SchedulerJob[] = [];
+
+// life
+const pendingPostFlushCbs: Function[] = [];
 
 let resolvedPromise: Promise<any> = Promise.resolve();
 let currentFlushPromise: Promise<void> | null = null;
@@ -31,10 +35,25 @@ function queueFlush(){
 // 清空任务
 function flushJobs(){
     isFlushPending = false;
-    let job;
-    while (job = queue.shift()) {
-       job && job();
+    for (let i = 0, len = queue.length; i < len; i++) {
+        queue[i]();
     }
+    queue.length = 0;
+    flushPostFlushCbs();
+}
+
+// life
+function flushPostFlushCbs() {
+    for (let i = 0, len = pendingPostFlushCbs.length; i < len; i++) {
+        pendingPostFlushCbs[i]();
+    }
+    pendingPostFlushCbs.length = 0;
+}
+
+// life
+export function queuePostRenderEffect(cb: Function[]) {
+    pendingPostFlushCbs.push(...cb)
+    queueFlush()
 }
 
 // nextTick机制
