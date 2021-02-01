@@ -4,7 +4,8 @@ import {
     RendererNode
 } from '../shared/svu';
 import {
-    isString
+    isString,
+    isOn,
 } from '../shared';
 
 function patchClass(el: RendererNode, value: string | null) {
@@ -36,6 +37,29 @@ function patchAttr(el: RendererNode, key: string, value: any) {
     }
 }
 
+function patchEvent(
+    el: RendererNode,
+    rawName: string,
+    prevValue: any,
+    nextValue: any,
+) {
+    const invokers = el._vei || (el._vei = {});
+    const existingInvoker = invokers[rawName]
+    if (nextValue && existingInvoker) {
+        existingInvoker.value = nextValue
+    } else {
+        const name = rawName.replace('on', '').toLowerCase();
+        if (nextValue) {
+            // add
+            el.addEventListener(name, nextValue)
+        } else if (existingInvoker) {
+            // remove
+            el.removeEventListener(name, existingInvoker)
+            invokers[rawName] = undefined
+        }
+    }
+}
+
 export const patchProp: DOMRenderOptions['patchProp'] = (
     el,
     key,
@@ -50,6 +74,11 @@ export const patchProp: DOMRenderOptions['patchProp'] = (
             patchStyle(el, prevValue, nextValue);
             break;
         default:
-            patchAttr(el, key, nextValue);
+            // 事件处理
+            if(isOn(key)){
+                patchEvent(el, key, prevValue, nextValue)
+            }else{
+                patchAttr(el, key, nextValue);
+            }
     }
 }

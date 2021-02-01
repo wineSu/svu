@@ -188,7 +188,7 @@ function createRenderer<
             } else {
                 // 动态 class
                 if(patchFlag & PatchFlags.CLASS){
-                    if(oldProps.class != newProps.class){
+                    if(oldProps!.class != newProps!.class){
                         hostPatchProp(el, 'class', null, newProps.class)
                     }
                 }

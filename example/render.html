@@ -71,8 +71,8 @@
             
             return () => {
                 return state.flag ?
-                    h('div', { style: { color: 'red' } }, `${state.count}--hello`) :
-                    h('p', { style: { color: 'blue' } }, `${state.count}--word`)
+                    h('div', { style: { color: 'red' }, onClick: $event => (console.log($event)), }, `${state.count}--hello`) :
+                    h('p', { style: { color: 'blue' }, onClick: $event => (console.log($event)) }, `${state.count}--word`)
             }
         }
         // setup() {

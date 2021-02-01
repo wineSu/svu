@@ -157,25 +157,10 @@ export interface ComponentInstance {
   isMounted: boolean
 
   [LifecycleHooks.BEFORE_MOUNT]: LifecycleHook
-  /**
-   * @internal
-   */
   [LifecycleHooks.MOUNTED]: LifecycleHook
-  /**
-   * @internal
-   */
   [LifecycleHooks.BEFORE_UPDATE]: LifecycleHook
-  /**
-   * @internal
-   */
   [LifecycleHooks.UPDATED]: LifecycleHook
-  /**
-   * @internal
-   */
   [LifecycleHooks.BEFORE_UNMOUNT]: LifecycleHook
-  /**
-   * @internal
-   */
   [LifecycleHooks.UNMOUNTED]: LifecycleHook
 }
 
