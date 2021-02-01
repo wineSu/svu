@@ -8,6 +8,10 @@ import {
     isObject
 } from '../shared';
 
+import {
+    compile
+} from '../compiler'
+
 // 组件实例 生命周期使用
 export let currentInstance: ComponentInstance | null = null;
 
@@ -69,7 +73,7 @@ function finishComponentSetup(
     if(!instance.render){
         if(Component.template && !Component.render){
             // TODO：编译模块  等runtime搞完再看这块
-            // Component.render = compile()
+            Component.render = compile(Component.template)
         }
         instance.render = Component.render
     }

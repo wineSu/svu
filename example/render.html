@@ -40,6 +40,18 @@
         //         }, [`${state.count}--${state.msg}`, 111111111])
         //     }
         // }
+        template: `
+            <div>
+                <div v-if="true"> <!-- 即使这里是 section -->
+                    <p @click = "state.count++">11{{state.count}}</p>
+                </div>
+                <div v-else>
+                    <p>
+                        <span>222</span>
+                    </p>
+                </div >
+            </div>
+        `,
         setup() {
             onBeforeMount(() => {
                 console.log('onBeforeMount')
@@ -69,11 +81,11 @@
                 state.count = 200;
             }, 1000);
             
-            return () => {
-                return state.flag ?
-                    h('div', { style: { color: 'red' }, onClick: $event => (console.log($event)), }, `${state.count}--hello`) :
-                    h('p', { style: { color: 'blue' }, onClick: $event => (console.log($event)) }, `${state.count}--word`)
-            }
+            // return () => {
+            //     return state.flag ?
+            //         h('div', { style: { color: 'red' }, onClick: $event => (console.log($event)), }, `${state.count}--hello`) :
+            //         h('p', { style: { color: 'blue' }, onClick: $event => (console.log($event)) }, `${state.count}--word`)
+            // }
         }
         // setup() {
         //     const state = reactive({ flag: true, count: '0', });

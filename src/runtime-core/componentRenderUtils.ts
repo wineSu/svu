@@ -13,15 +13,16 @@ import {
 
 import {
     isArray
-} from '../shared'
+} from '../shared';
 
 export function renderComponentRoot(
     instance: ComponentInstance
 ): VNode{
     const {
-        render
+        render,
+        setupState
     } = instance;
-    return normalizeVNode(render());
+    return normalizeVNode(render(setupState));
 }
 
 export function normalizeVNode(child: VNodeChild): VNode {
