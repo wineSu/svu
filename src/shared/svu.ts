@@ -238,3 +238,59 @@ export interface CreateHook {
   (lifecycle: LifecycleHooks): 
     <T extends Function = () => any>(hook: T, target: ComponentInstance | null) => void
 }
+
+// compiler
+export interface ParserContext {
+  readonly originalSource: string
+  source: string
+  offset: number
+  line: number
+  column: number
+  inPre: boolean // HTML <pre> tag, preserve whitespaces
+  inVPre: boolean // v-pre, do not process directives and interpolations
+}
+
+export interface Position {
+  offset: number // from start of file
+  line: number
+  column: number
+}
+
+export const enum NodeTypes {
+  ROOT,
+  ELEMENT,
+  TEXT,
+  COMMENT,
+  SIMPLE_EXPRESSION,
+  INTERPOLATION,
+  ATTRIBUTE,
+  DIRECTIVE,
+  // containers
+  COMPOUND_EXPRESSION,
+  IF,
+  IF_BRANCH,
+  FOR,
+  TEXT_CALL,
+  // codegen
+  VNODE_CALL,
+  JS_CALL_EXPRESSION,
+  JS_OBJECT_EXPRESSION,
+  JS_PROPERTY,
+  JS_ARRAY_EXPRESSION,
+  JS_FUNCTION_EXPRESSION,
+  JS_CONDITIONAL_EXPRESSION,
+  JS_CACHE_EXPRESSION,
+}
+
+export const enum TextModes {
+  //          | Elements | Entities | End sign              | Inside of
+  DATA, //    | ✔        | ✔        | End tags of ancestors |
+  RCDATA, //  | ✘        | ✔        | End tag of the parent | <textarea>
+  RAWTEXT, // | ✘        | ✘        | End tag of the parent | <style>,<script>
+  CDATA,
+  ATTRIBUTE_VALUE
+}
+
+export const enum Namespaces {
+  HTML
+}
