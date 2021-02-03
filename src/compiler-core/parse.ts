@@ -6,11 +6,36 @@ import {
 } from '../shared/svu'
 
 import {
+    NO
+} from '../shared'
+
+import {
     createRoot
 } from './ast'
 
+const decodeRE = /&(gt|lt|amp|apos|quot);/g;
+const decodeMap: Record<string, string> = {
+    gt: '>',
+    lt: '<',
+    amp: '&',
+    apos: "'",
+    quot: '"'
+};
+export const defaultParserOptions = {
+    delimiters: [`{{`, `}}`],
+    getNamespace: () => Namespaces.HTML,
+    getTextMode: () => TextModes.DATA,
+    isVoidTag: NO,
+    isPreTag: NO,
+    isCustomElement: NO,
+    decodeEntities: (rawText: string): string =>
+      rawText.replace(decodeRE, (_, p1) => decodeMap[p1]),
+    comments: false
+}
+
 export function baseParse(content: string){
     const context = {
+        options: defaultParserOptions,
         column: 1,
         line: 1,
         offset: 0,
