@@ -241,6 +241,7 @@ export interface CreateHook {
 
 // compiler
 export interface ParserContext {
+  options: any
   readonly originalSource: string
   source: string
   offset: number
