@@ -42,8 +42,8 @@
         // }
         template: `
             <div>
-                <div v-if="true"> <!-- 即使这里是 section -->
-                    <p @click = "state.count++">11{{state.count}}</p>
+                <div v-if="true">
+                    <p @click = "tes">11{{state.count}}</p>
                 </div>
                 <div v-else>
                     <p>
@@ -74,12 +74,21 @@
             
             const state = reactive({ flag: true, count: '0', });
 
-            setTimeout(() => {
-                // 测试批量更新
-                state.flag = false;
-                state.count = 100;
-                state.count = 200;
-            }, 1000);
+            const tes = () => {
+                state.count++
+            }
+
+            return {
+                state,
+                tes
+            }
+
+            // setTimeout(() => {
+            //     // 测试批量更新
+            //     state.flag = false;
+            //     state.count = 100;
+            //     state.count = 200;
+            // }, 1000);
            
             // return () => {
             //     return state.flag ?

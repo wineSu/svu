@@ -247,8 +247,6 @@ export interface ParserContext {
   offset: number
   line: number
   column: number
-  inPre: boolean // HTML <pre> tag, preserve whitespaces
-  inVPre: boolean // v-pre, do not process directives and interpolations
 }
 
 export interface Position {
@@ -281,15 +279,6 @@ export const enum NodeTypes {
   JS_FUNCTION_EXPRESSION,
   JS_CONDITIONAL_EXPRESSION,
   JS_CACHE_EXPRESSION,
-}
-
-export const enum TextModes {
-  //          | Elements | Entities | End sign              | Inside of
-  DATA, //    | ✔        | ✔        | End tags of ancestors |
-  RCDATA, //  | ✘        | ✔        | End tag of the parent | <textarea>
-  RAWTEXT, // | ✘        | ✘        | End tag of the parent | <style>,<script>
-  CDATA,
-  ATTRIBUTE_VALUE
 }
 
 export const enum Namespaces {

@@ -68,12 +68,14 @@
     // reactive定义
     let reactiveHandlers = {
         get(target, key, reciver){
+            console.log(2222)
             let res = Reflect.get(target, key, reciver);
             // 取值时 添加effect回调 订阅
             track(target, key)
             return res;
         },
         set(target, key, value, reciver){
+            console.log(11111)
             const oldValue = target[key];
             const result = Reflect.set(target, key, value, reciver);
             // 避免effect中重复设置将会死循环
@@ -117,15 +119,17 @@
         count: 0
     })
 
+    state.count++
+
     // // let num = ref(1);
 
-    let res = computed(() => {
-        console.log(1111111)
-        return state.count + 10
-    })
+    // let res = computed(() => {
+    //     console.log(1111111)
+    //     return state.count + 10
+    // })
 
     watchEffect(() => {
-        console.log('reactive中有值变动：'+ res.value);
+        console.log('reactive中有值变动：'+ state.count);
         // state.count++
     })
 

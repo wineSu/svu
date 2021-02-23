@@ -1,7 +1,6 @@
 import {
     ParserContext,
     Position,
-    TextModes,
     Namespaces,
     NodeTypes
 } from '../shared/svu'
@@ -15,6 +14,14 @@ import {
     createRoot
 } from './ast'
 
+const enum TagType {
+    Start,
+    End
+}
+
+const tagRe = /^<\/?([a-z][^\t\r\n\f />]*)>/i;
+const tagSpaceRe = /^[\t\r\n\f ]+/;
+
 const decodeRE = /&(gt|lt|amp|apos|quot);/g;
 const decodeMap: Record<string, string> = {
     gt: '>',
@@ -26,7 +33,6 @@ const decodeMap: Record<string, string> = {
 export const defaultParserOptions = {
     delimiters: [`{{`, `}}`],
     getNamespace: () => Namespaces.HTML,
-    getTextMode: () => TextModes.DATA,
     isVoidTag: NO,
     isPreTag: NO,
     isCustomElement: NO,
@@ -43,12 +49,10 @@ export function baseParse(content: string){
         offset: 0,
         originalSource: content,
         source: content,
-        inPre: false,
-        inVPre: false
     }
     const start = getCursor(context);
     return createRoot(
-        parseChildren(context, TextModes.DATA, []),
+        parseChildren(context, []),
         getSelection(context, start)
     )
 }
@@ -78,27 +82,22 @@ function getSelection(
  */
 function parseChildren(
     context: ParserContext,
-    mode: TextModes,
     ancestors: any
 ) {
-    const parent = ancestors[ancestors.length - 1];
-    const ns = parent ? parent.ns : Namespaces.HTML;
     const nodes = [];
     
-    while (!isEnd(context, mode, ancestors)) {
+    while (!isEnd(context, ancestors)) {
         const s = context.source
         let node = undefined;
         
-        if (mode === TextModes.DATA || mode === TextModes.RCDATA) {
-            if (!context.inVPre && startsWith(s, context.options.delimiters[0])) {
-                // '{{'
-                // node = parseInterpolation(context, mode)
-            } else if (/[a-z]/i.test(s[1])) {
-                // node = parseElement(context, ancestors)
-            }
+        if (startsWith(s, context.options.delimiters[0])) {
+            // '{{'
+            // node = parseInterpolation(context, mode)
+        } else if (/[a-z]/i.test(s[1])) {
+            node = parseElement(context, ancestors)
         }
         if (!node) {
-            node = parseText(context, mode)
+            node = parseText(context)
         }
     
         if (isArray(node)) {
@@ -112,7 +111,50 @@ function parseChildren(
     return nodes;
 }
 
-function parseText(context: ParserContext, mode: TextModes) {
+function parseElement(context: ParserContext, ancestors: Element[]): any {
+    const element = parseTag(context, TagType.Start);
+
+    // children
+    ancestors.push(element);
+    const children = parseChildren(context, ancestors);
+    ancestors.pop();
+
+    element.children = children;
+
+    if(startsWithEndTagOpen(context.source, element.tag)){
+        parseTag(context, TagType.End);
+    }
+
+    element.loc = getSelection(context, element.loc.staart);
+
+    return element;
+}
+
+function parseTag(context: ParserContext, type: TagType): any {
+    const start = getCursor(context);
+    const [tagStart, tag] = tagRe.exec(context.source)!;
+    
+    // 位置计算
+    advanceBy(context, tagStart.length);
+    advanceSpace(context); // tag 空格 <div v-if=...>
+
+    let props = parseAttributes(context, type);
+
+    if(!context.source.length){
+        // <div> >
+        advanceBy(context, 1);
+    }
+
+    return{
+        tag,
+        props,
+        loc: getSelection(context, start)
+    }
+}
+
+// TODO 属性解析
+
+function parseText(context: ParserContext) {
   
     const endTokens = ['<', context.options.delimiters[0]]
   
@@ -141,6 +183,11 @@ function parseTextData(
     const rawText = context.source.slice(0, length)
     advanceBy(context, length)
     return rawText;
+}
+
+function advanceSpace(content: any) {
+    const match = tagSpaceRe.exec(content.source);
+    match && advanceBy(content, match[0].length);
 }
 
 function advanceBy(context: any, numberOfCharacters: number) {
@@ -177,39 +224,20 @@ function startsWith(source: string, searchString: string): boolean {
     return source.startsWith(searchString)
 }
 
-function last<T>(xs: T[]): T | undefined {
-    return xs[xs.length - 1]
-}
 function isEnd(
     context: ParserContext,
-    mode: TextModes,
     ancestors: any
 ): boolean {
     const s = context.source
-  
-    switch (mode) {
-      case TextModes.DATA:
-        if (startsWith(s, '</')) {
-          for (let i = ancestors.length - 1; i >= 0; --i) {
+    if (startsWith(s, '</')) {
+        for (let i = ancestors.length - 1; i >= 0; --i) {
             if (startsWithEndTagOpen(s, ancestors[i].tag)) {
-              return true
+                return true
             }
-          }
         }
-        break
-  
-      case TextModes.RCDATA:
-      case TextModes.RAWTEXT: {
-        const parent = last(ancestors)
-        if (parent && startsWithEndTagOpen(s, (parent as any).tag)) {
-          return true
-        }
-        break
-      }
     }
-  
     return !s
-  }
+}
   
 function startsWithEndTagOpen(source: string, tag: string): boolean {
     return (
