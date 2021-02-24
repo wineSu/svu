@@ -2,12 +2,14 @@ import {
     ParserContext,
     Position,
     Namespaces,
-    NodeTypes
+    NodeTypes,
+    AttributeNode
 } from '../shared/svu'
 
 import {
     NO,
-    isArray
+    isArray,
+    extend
 } from '../shared'
 
 import {
@@ -19,8 +21,12 @@ const enum TagType {
     End
 }
 
-const tagRe = /^<\/?([a-z][^\t\r\n\f />]*)>/i;
+const tagRe = /^<\/?([a-z][^\t\r\n\f />]*)/i;
 const tagSpaceRe = /^[\t\r\n\f ]+/;
+const quoteRe = /^[\t\r\n\f ]*=/;
+const attrRe = /^[^\t\r\n\f />][^\t\r\n\f />=]*/;
+const bindRe = /^(v-|:|@|#)/;
+const bindNameRe = /(?:^v-([a-z0-9-]+))?(?:(?::|^@|^#)(\[[^\]]+\]|[^\.]+))?(.+)?$/i;
 
 const decodeRE = /&(gt|lt|amp|apos|quot);/g;
 const decodeMap: Record<string, string> = {
@@ -125,7 +131,7 @@ function parseElement(context: ParserContext, ancestors: Element[]): any {
         parseTag(context, TagType.End);
     }
 
-    element.loc = getSelection(context, element.loc.staart);
+    element.loc = getSelection(context, element.loc.start);
 
     return element;
 }
@@ -152,7 +158,95 @@ function parseTag(context: ParserContext, type: TagType): any {
     }
 }
 
-// TODO 属性解析
+// 属性解析
+function parseAttributes(context: ParserContext, type: TagType): AttributeNode[] {
+    const props: AttributeNode[] = [];
+    const attrNames = new Set();
+    while(
+        context.source.length > 0 &&
+        !startsWith(context.source, '>') && 
+        !startsWith(context.source, '/>')
+    ){
+        // 解析 attr
+        if(type === TagType.Start){
+
+            const start = getCursor(context);
+            const [name] = attrRe.exec(context.source)!;
+            attrNames.add(name);
+            advanceBy(context, name.length);
+            let value = undefined;
+
+            if (quoteRe.test(context.source)) {
+                advanceSpace(context)
+                advanceBy(context, 1)
+                advanceSpace(context)
+                value = parseAttributeValue(context)
+            }
+            const loc = getSelection(context, start);
+
+            if (bindRe.test(name)) {
+                const match = bindNameRe.exec(name)!;
+                const dirName = match[1] || (startsWith(name, ':') ? 'bind' : startsWith(name, '@') ? 'on' : 'slot');
+                let arg;
+                if (match[2]) {
+                    const startOffset = name.indexOf(match[2])
+                    const loc = getSelection(
+                        context,
+                        getNewPosition(context, start, startOffset),
+                        getNewPosition(context, start, startOffset + match[2].length)
+                    )
+                    let content = match[2];
+                    let isStatic = true
+                    arg = {
+                        type: NodeTypes.SIMPLE_EXPRESSION,
+                        content,
+                        isStatic,
+                        loc
+                    }
+                }
+
+                if (value && value.isQuoted) {
+                    const valueLoc = value.loc
+                    valueLoc.start.offset++
+                    valueLoc.start.column++
+                    valueLoc.end = advancePositionWithClone(valueLoc.start, value.content)
+                    valueLoc.source = valueLoc.source.slice(1, -1)
+                }
+
+                props.push({
+                    type: NodeTypes.DIRECTIVE,
+                    name: dirName,
+                    exp: value && {
+                        type: NodeTypes.SIMPLE_EXPRESSION,
+                        content: value.content,
+                        isStatic: false,
+                        loc: value.loc
+                    },
+                    arg,
+                    loc
+                })
+            }
+        }
+        advanceSpace(context);
+    }
+    return props;
+}
+
+function parseAttributeValue(context: ParserContext) {
+    const start = getCursor(context);
+    let content!: string;
+
+    const quote = context.source[0];
+    const isQuoted = quote === `"` || quote === `'`;
+    if (isQuoted) {
+        // Quoted value.
+        advanceBy(context, 1)
+        const endIndex = context.source.indexOf(quote)
+        content = parseTextData(context, endIndex)
+        advanceBy(context, 1)
+    }
+    return { content, isQuoted, loc: getSelection(context, start) }
+}
 
 function parseText(context: ParserContext) {
   
@@ -218,6 +312,26 @@ function advancePositionWithMutation(
         : numberOfCharacters - lastNewLinePos
   
     return pos
+}
+
+function getNewPosition(context: ParserContext, start: Position, numberOfCharacters: number): Position {
+    return advancePositionWithClone(
+      start,
+      context.originalSource.slice(start.offset, numberOfCharacters),
+      numberOfCharacters
+    )
+}
+
+export function advancePositionWithClone(
+    pos: Position,
+    source: string,
+    numberOfCharacters: number = source.length
+): Position {
+    return advancePositionWithMutation(
+        extend({}, pos),
+        source,
+        numberOfCharacters
+    )
 }
 
 function startsWith(source: string, searchString: string): boolean {

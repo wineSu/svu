@@ -284,3 +284,12 @@ export const enum NodeTypes {
 export const enum Namespaces {
   HTML
 }
+
+export interface AttributeNode{
+  type: NodeTypes.ATTRIBUTE | NodeTypes.DIRECTIVE,
+  name: string,
+  value?: any,
+  exp: any,
+  arg: any,
+  loc?: any
+}
