@@ -114,7 +114,13 @@ function parseChildren(
             nodes.push(node);
         }
     }
-    return nodes;
+    // content为空的优化去除
+    for(let i = 0, len = nodes.length; i < len; i++){
+        if (!/[^\t\r\n\f ]/.test(nodes[i].content)) {
+            nodes[i] = null;
+        }
+    }
+    return nodes.filter(Boolean);
 }
 
 // {{aaa}}
@@ -181,7 +187,7 @@ function parseTag(context: ParserContext, type: TagType): any {
 
     let props = parseAttributes(context, type);
 
-    if(!context.source.length){
+    if(context.source.length){
         // <div> >
         advanceBy(context, 1);
     }
