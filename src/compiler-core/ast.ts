@@ -1,11 +1,24 @@
 import {
-    NodeTypes
-} from '../shared/svu'
+    NodeTypes,
+    CallExpression,
+    ConditionalExpression
+} from '../shared/svu';
+
+import {
+    isString
+} from '../shared'
 
 export const locStub = {
     source: '',
     start: { line: 1, column: 1, offset: 0 },
     end: { line: 1, column: 1, offset: 0 }
+}
+
+export const enum ConstantTypes {
+    NOT_CONSTANT = 0,
+    CAN_SKIP_PATCH,
+    CAN_HOIST,
+    CAN_STRINGIFY
 }
 
 export function createRoot(
@@ -24,5 +37,61 @@ export function createRoot(
         temps: 0,
         codegenNode: undefined,
         loc
+    }
+}
+
+export function createConditionalExpression(
+    test: ConditionalExpression['test'],
+    consequent: ConditionalExpression['consequent'],
+    alternate: ConditionalExpression['alternate'],
+    newline = true
+): ConditionalExpression {
+    return {
+        type: NodeTypes.JS_CONDITIONAL_EXPRESSION,
+        test,
+        consequent,
+        alternate,
+        newline,
+        loc: locStub
+    }
+}
+
+export function createCallExpression<T extends CallExpression['callee']>(
+    callee: T,
+    args: any,
+){
+    return {
+      type: NodeTypes.JS_CALL_EXPRESSION,
+      loc: locStub,
+      callee,
+      arguments: args
+    } as any
+}
+
+
+export function createSimpleExpression(
+    content: any,
+    isStatic: any,
+    loc = locStub,
+    constType = ConstantTypes.NOT_CONSTANT
+) {
+    return {
+      type: NodeTypes.SIMPLE_EXPRESSION,
+      loc,
+      content,
+      isStatic,
+      constType: isStatic ? ConstantTypes.CAN_STRINGIFY : constType
+    } as any
+}
+
+export function createObjectProperty(
+    key: any,
+    value: any
+) {
+    return {
+      type: NodeTypes.JS_PROPERTY,
+      loc: locStub,
+      key: isString(key) ? createSimpleExpression(key, true) : key,
+      value
     }
 }

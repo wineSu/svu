@@ -293,3 +293,53 @@ export interface AttributeNode{
   arg: any,
   loc?: any
 }
+
+export interface SourceLocation {
+  start: Position
+  end: Position
+  source: string
+}
+
+export interface Position {
+  offset: number // from start of file
+  line: number
+  column: number
+}
+
+export interface Node {
+  type: NodeTypes
+  loc: SourceLocation,
+  props?: any,
+  tagType?: any
+}
+
+export type StructuralDirectiveTransform = (
+  node: Node,
+  dir: any,
+  context: any
+) => void | (() => void)
+
+export type NodeTransform = (
+  node: Node,
+  context: any
+) => void | (() => void) | (() => void)[]
+
+export type JSChildNode = CallExpression
+  
+export interface CallExpression extends Node {
+  type: NodeTypes.JS_CALL_EXPRESSION
+  callee: string | symbol
+  arguments: (
+    | string
+    | symbol
+    | JSChildNode
+  )
+}
+
+export interface ConditionalExpression extends Node {
+  type: NodeTypes.JS_CONDITIONAL_EXPRESSION
+  test: JSChildNode
+  consequent: JSChildNode
+  alternate: JSChildNode
+  newline: boolean
+}
