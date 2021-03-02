@@ -7,6 +7,9 @@ import {
     isArray
 } from '../shared';
 import {
+    hoistStatic
+} from './transforms/hoistStatic';
+import {
     NodeTypes
 } from '../shared/svu';
 
@@ -17,6 +20,11 @@ import {
 export function createTransformContext() {
     const context: any = {
         hoists: [],
+        helpers: new Set(),
+        helper(name: any) {
+            context.helpers.add(name)
+            return name
+        },
         replaceNode(node: any) {
             context.parent!.children[context.childIndex] = context.currentNode = node
         },

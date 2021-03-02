@@ -30,3 +30,9 @@ export const isOn = (key: string) => onRE.test(key);
 export const isModelListener = (key: string) => key.startsWith('onUpdate:')
 
 export const NO = () => false
+
+export const isStaticExp = (p: any) => p.type === 4 /* SIMPLE_EXPRESSION */ && p.isStatic;
+
+export function isText(node: any) {
+  return node.type === 2
+}

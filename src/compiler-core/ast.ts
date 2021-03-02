@@ -95,3 +95,52 @@ export function createObjectProperty(
       value
     }
 }
+
+export function createObjectExpression(
+    properties: any,
+    loc = locStub
+  ) {
+    return {
+      type: NodeTypes.JS_OBJECT_EXPRESSION,
+      loc,
+      properties
+    }
+}
+
+export function createVNodeCall(
+    context: any,
+    tag: any,
+    props?: any,
+    children?: any,
+    patchFlag?: any,
+    dynamicProps?: any,
+    directives?: any,
+    isBlock = false,
+    disableTracking = false,
+    loc = locStub
+  ) {
+    if (context) {
+      if (isBlock) {
+        context.helper('OPEN_BLOCK')
+        context.helper('CREATE_BLOCK')
+      } else {
+        context.helper('CREATE_VNODE')
+      }
+      if (directives) {
+        context.helper('WITH_DIRECTIVES')
+      }
+    }
+  
+    return {
+      type: NodeTypes.VNODE_CALL,
+      tag,
+      props,
+      children,
+      patchFlag,
+      dynamicProps,
+      directives,
+      isBlock,
+      disableTracking,
+      loc
+    }
+  }
