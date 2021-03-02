@@ -13,6 +13,11 @@ import {
     NodeTypes
 } from '../shared/svu';
 
+import { transformIf } from './transforms/vIf'
+import { transformElement } from './transforms/transformElement'
+import { transformOn } from './transforms/vOn'
+import { transformText } from './transforms/transformText'
+
 /**
  * transfrom顺序为后序遍历
  */
@@ -59,6 +64,14 @@ export function createTransformContext() {
             identifier.hoisted = exp
             return identifier
         },
+        nodeTransforms: [
+            transformIf,
+            transformElement,
+            transformText
+        ],
+        directiveTransforms: {
+            on: transformOn,
+        }
     }
     return context
 }
