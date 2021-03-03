@@ -83,28 +83,11 @@ export function transform(root: any) {
     root.hoists = context.hoists
 }
 
-export function traverseChildren(
-    parent: ParentNode,
-    context: any
-) {
-    let i = 0
-    const nodeRemoved = () => {
-        i--
-    }
-    for (; i < parent.children.length; i++) {
-        const child = parent.children[i]
-        if (isString(child)) continue
-        context.parent = parent
-        context.childIndex = i
-        context.onNodeRemoved = nodeRemoved
-        traverseNode(child, context)
-    }
-}
-
 export function traverseNode(
     node: any,
     context: any
 ) {
+    console.log(node, 1111111111111)
     context.currentNode = node
     // apply transform plugins
     const { nodeTransforms } = context
@@ -145,5 +128,24 @@ export function traverseNode(
     let i = exitFns.length
     while (i--) {
         exitFns[i]()
+    }
+}
+
+export function traverseChildren(
+    parent: ParentNode,
+    context: any
+) {
+    let i = 0
+    const nodeRemoved = () => {
+        i--
+    }
+    console.log(parent.children)
+    for (; i < parent.children.length; i++) {
+        const child = parent.children[i]
+        if (isString(child)) continue
+        context.parent = parent
+        context.childIndex = i
+        context.onNodeRemoved = nodeRemoved
+        traverseNode(child, context)
     }
 }

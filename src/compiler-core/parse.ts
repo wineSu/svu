@@ -193,6 +193,7 @@ function parseTag(context: ParserContext, type: TagType): any {
     }
 
     return{
+        type: NodeTypes.ELEMENT,
         tag,
         props,
         loc: getSelection(context, start)
