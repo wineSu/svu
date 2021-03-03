@@ -19,7 +19,6 @@ function walk(
     doNotHoistNode: boolean = false
 ) {
     let hasHoistedNode = false;
-    let canStringify = true;
 
     const { children } = node
     for (let i = 0; i < children.length; i++) {
@@ -30,9 +29,7 @@ function walk(
                 ? ConstantTypes.NOT_CONSTANT
                 : getConstantType(child, context)
             if (constantType > ConstantTypes.NOT_CONSTANT) {
-                if (constantType < ConstantTypes.CAN_STRINGIFY) {
-                    canStringify = false
-                }
+               
                 if (constantType >= ConstantTypes.CAN_HOIST) {
                     ; (child.codegenNode).patchFlag = PatchFlags.HOISTED;
                     child.codegenNode = context.hoist(child.codegenNode!)
@@ -81,7 +78,6 @@ export function getConstantType(
     node: any,
     context: any
 ): ConstantTypes {
-    const { constantCache } = context
     switch (node.type) {
         case NodeTypes.ELEMENT:
             
@@ -93,7 +89,6 @@ export function getConstantType(
             
                 return returnType
             } else {
-                constantCache.set(node, ConstantTypes.NOT_CONSTANT)
                 return ConstantTypes.NOT_CONSTANT
             }
         case NodeTypes.TEXT:

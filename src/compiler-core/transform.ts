@@ -18,10 +18,7 @@ import { transformElement } from './transforms/transformElement'
 import { transformOn } from './transforms/vOn'
 import { transformText } from './transforms/transformText'
 
-/**
- * transfrom顺序为后序遍历
- */
-
+// context 转换ast工具和信息集
 export function createTransformContext() {
     const context: any = {
         hoists: [],
@@ -76,10 +73,16 @@ export function createTransformContext() {
     return context
 }
 
+/**
+ * 语法制导分析
+ * traverseNode 顺序为后序遍历
+ */
 export function transform(root: any) {
     const context = createTransformContext()
     traverseNode(root, context)
     hoistStatic(root, context)
+    // root.codegenNode挂载
+    root.codegenNode = root.children[0]
     root.hoists = context.hoists
 }
 
@@ -87,7 +90,6 @@ export function traverseNode(
     node: any,
     context: any
 ) {
-    console.log(node, 1111111111111)
     context.currentNode = node
     // apply transform plugins
     const { nodeTransforms } = context
@@ -109,9 +111,9 @@ export function traverseNode(
             node = context.currentNode
         }
     }
-
     switch (node.type) {
         case NodeTypes.IF:
+            // 这里只对if的情况先处理，else等后面遍历到的时候，同样需要再次traverseNode
             for (let i = 0; i < node.branches.length; i++) {
                 traverseNode(node.branches[i], context)
             }
@@ -122,8 +124,7 @@ export function traverseNode(
             traverseChildren(node, context)
             break
     }
-
-    // exit transforms
+    // 后序  保证子节点完成信息转换  父节点再完成
     context.currentNode = node
     let i = exitFns.length
     while (i--) {
@@ -139,10 +140,10 @@ export function traverseChildren(
     const nodeRemoved = () => {
         i--
     }
-    console.log(parent.children)
     for (; i < parent.children.length; i++) {
         const child = parent.children[i]
         if (isString(child)) continue
+        // 方便ast的一些转换操作
         context.parent = parent
         context.childIndex = i
         context.onNodeRemoved = nodeRemoved

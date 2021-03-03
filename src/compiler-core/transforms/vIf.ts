@@ -18,14 +18,13 @@ function createStructuralDirectiveTransform(
     fn: StructuralDirectiveTransform
 ): NodeTransform {
     const matches = (n: string) => name.test(n);
-
     return (node, context) => {
         if (node.type === NodeTypes.ELEMENT) {
             const { props } = node;
             const exitFns = [];
-
             for (let i = 0; i < props.length; i++) {
                 const prop = props[i];
+                // 这里搜寻属性中是否有v-if v-else
                 if (prop.type === NodeTypes.DIRECTIVE && matches(prop.name)) {
                     props.splice(i, 1);
                     i--;
@@ -41,6 +40,7 @@ function createStructuralDirectiveTransform(
 export const transformIf = createStructuralDirectiveTransform(
     /^(if|else|else-if)$/,
     (node, dir, context) => {
+        // 给到traverseNode中的exitFns是 processIf中的最后一个参数
         return processIf(node, dir, context, (ifNode, branch, isRoot) => {
             return () => {
                 if (isRoot) {
@@ -77,31 +77,29 @@ export function processIf(
             loc: node.loc,
             branches: [branch]
         }
+        // 旧的 ast 转为 v-if 信息
         context.replaceNode(ifNode)
         if (processCodegen) {
             return processCodegen(ifNode, branch, true)
         }
     } else {
-        // locate the adjacent v-if
+        // v-else
         const siblings = context.parent!.children
         let i = siblings.indexOf(node)
         while (i-- >= -1) {
             const sibling = siblings[i]
 
             if (sibling && sibling.type === NodeTypes.IF) {
-                // move the node to the if node's branches
+                // 删除当前 else节点  为了和 if 的 branch放在一起
                 context.removeNode()
                 const branch = createIfBranch(node, dir)
-               
+                // 推入 if 的branch
                 sibling.branches.push(branch)
                 const onExit = processCodegen && processCodegen(sibling, branch, false)
-                // since the branch was removed, it will not be traversed.
-                // make sure to traverse here.
+                // else 分支里面还有内容 需要再次进行转换
                 traverseNode(branch, context)
                 // call on exit
-                if (onExit) onExit()
-                // make sure to reset currentNode after traversal to indicate this
-                // node has been removed.
+                onExit && onExit()
                 context.currentNode = null
             }
             break
@@ -122,6 +120,7 @@ function createCodegenNodeForBranch(
     branch: any,
     context: any
 ){
+    // if
     if (branch.condition) {
         return createConditionalExpression(
             branch.condition,
@@ -133,7 +132,7 @@ function createCodegenNodeForBranch(
                 'true'
             ])
         )
-    } else {
+    } else { // else
         return createChildrenCodegenNode(branch, context)
     }
 }

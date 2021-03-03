@@ -7,7 +7,7 @@ import { transform } from './transform';
  */
 export function baseCompile(template: string) {
     const ast = baseParse(template);
-    // transform(ast);
+    transform(ast);
     console.log('ast', ast)
     return '';
 }

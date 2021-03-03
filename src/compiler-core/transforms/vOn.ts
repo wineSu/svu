@@ -9,7 +9,6 @@ import{
 
 export const transformOn = (
     dir: any,
-    augmentor: any
 ) => {
     const { loc, arg } = dir
     
@@ -35,10 +34,6 @@ export const transformOn = (
                 exp || createSimpleExpression(`() => {}`, false, loc)
             )
         ]
-    }
-
-    if (augmentor) {
-        ret = augmentor(ret)
     }
     return ret
 }
