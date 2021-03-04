@@ -15,7 +15,7 @@ import {
 
 import { getConstantType } from './hoistStatic'
 
-// generate a JavaScript AST for this element's codegen
+// 节点的转换 主要是属性的控制 这里简单看就是处理了事件绑定的属性
 export const transformElement = (node: any, context: any) => {
     if (!(node.type === NodeTypes.ELEMENT)) {
         return;
@@ -32,6 +32,7 @@ export const transformElement = (node: any, context: any) => {
         let shouldUseBlock;
         // props
         if (props.length > 0) {
+            // vif  velse 前面先处理过的会把属性删掉
             const propsBuildResult = buildProps(node, context)
             vnodeProps = propsBuildResult.props
             patchFlag = propsBuildResult.patchFlag
@@ -94,24 +95,17 @@ export function buildProps(
 ){
     const { loc: elementLoc } = node
     let properties = []
-
     // patchFlag analysis
     let patchFlag = 0
-    let hasClassBinding = false
-    let hasHydrationEventBinding = false
     const dynamicPropNames: string[] = []
-
     const analyzePatchFlag = ({ key }: any) => {
         if (isStaticExp(key)) {
             const name = key.content
-            if (name === 'class') {
-                hasClassBinding = true
-            } else if (name !== 'key' && !dynamicPropNames.includes(name)) {
+            if (name !== 'key' && !dynamicPropNames.includes(name)) {
                 dynamicPropNames.push(name)
             }
         }
     }
-
     for (let i = 0; i < props.length; i++) {
         // static attribute
         const prop = props[i]
@@ -125,26 +119,16 @@ export function buildProps(
             properties.push(...props)
         }
     }
-
     let propsExpression = undefined
-
-   if (properties.length) {
+    if (properties.length) {
         propsExpression = createObjectExpression(
             properties,
             elementLoc
         )
     }
-
-    if (hasClassBinding) {
-        patchFlag |= PatchFlags.CLASS
-    }
     if (dynamicPropNames.length) {
         patchFlag |= PatchFlags.PROPS
     }
-    if (hasHydrationEventBinding) {
-        patchFlag |= PatchFlags.HYDRATE_EVENTS
-    }
-
     return {
         props: propsExpression,
         patchFlag,

@@ -24,7 +24,6 @@ export const transformText = (node: any, context: any) => {
       const children = node.children
       let currentContainer = undefined
       let hasText = false
-
       for (let i = 0; i < children.length; i++) {
         const child = children[i]
         if (isText(child)) {
@@ -66,14 +65,6 @@ export const transformText = (node: any, context: any) => {
           const callArgs = []
           if (child.type !== NodeTypes.TEXT || child.content !== ' ') {
             callArgs.push(child)
-          }
-          if (
-            !context.ssr &&
-            getConstantType(child, context) === ConstantTypes.NOT_CONSTANT
-          ) {
-            callArgs.push(
-              PatchFlags.TEXT + ``
-            )
           }
           children[i] = {
             type: NodeTypes.TEXT_CALL,

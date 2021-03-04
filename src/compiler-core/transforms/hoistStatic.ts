@@ -25,6 +25,7 @@ function walk(
         const child = children[i]
         // only plain elements & text calls are eligible for hoisting.
         if (child.type === NodeTypes.ELEMENT) {
+            // 初始去根据各种类型拿到是否需要提升节点
             const constantType = doNotHoistNode
                 ? ConstantTypes.NOT_CONSTANT
                 : getConstantType(child, context)
@@ -37,18 +38,14 @@ function walk(
                     continue
                 }
             } else {
-                // node may contain dynamic children, but its props may be eligible for
-                // hoisting.
+                // 动态节点  但属性为静态的
                 const codegenNode = child.codegenNode!
                 if (codegenNode.type === NodeTypes.VNODE_CALL) {
                     const flag = getPatchFlag(codegenNode)
-                    if (
-                        (!flag ||
+                    if ((!flag ||
                             flag === PatchFlags.NEED_PATCH ||
-                            flag === PatchFlags.TEXT) &&
-                        getGeneratedPropsConstantType(child, context) >=
-                        ConstantTypes.CAN_HOIST
-                    ) {
+                            flag === PatchFlags.TEXT
+                        )) {
                         const props = getNodeProps(child)
                         if (props) {
                             codegenNode.props = context.hoist(props)
@@ -58,7 +55,6 @@ function walk(
             }
         }
 
-        // walk further
         if (child.type === NodeTypes.ELEMENT) {
             walk(child, context)
         } else if (child.type === NodeTypes.IF) {
@@ -74,6 +70,7 @@ function walk(
     }
 }
 
+// 返回各种类型节点
 export function getConstantType(
     node: any,
     context: any
@@ -120,37 +117,6 @@ export function getConstantType(
     }
 }
 
-function getGeneratedPropsConstantType(
-    node: any,
-    context: any
-): ConstantTypes {
-    let returnType = ConstantTypes.CAN_STRINGIFY
-    const props = getNodeProps(node)
-    if (props && props.type === NodeTypes.JS_OBJECT_EXPRESSION) {
-        const { properties } = props
-        for (let i = 0; i < properties.length; i++) {
-            const { key, value } = properties[i]
-            const keyType = getConstantType(key, context)
-            if (keyType === ConstantTypes.NOT_CONSTANT) {
-                return keyType
-            }
-            if (keyType < returnType) {
-                returnType = keyType
-            }
-            if (value.type !== NodeTypes.SIMPLE_EXPRESSION) {
-                return ConstantTypes.NOT_CONSTANT
-            }
-            const valueType = getConstantType(value, context)
-            if (valueType === ConstantTypes.NOT_CONSTANT) {
-                return valueType
-            }
-            if (valueType < returnType) {
-                returnType = valueType
-            }
-        }
-    }
-    return returnType
-}
 
 function getNodeProps(node: any) {
     const codegenNode = node.codegenNode!

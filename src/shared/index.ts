@@ -34,5 +34,5 @@ export const NO = () => false
 export const isStaticExp = (p: any) => p.type === 4 /* SIMPLE_EXPRESSION */ && p.isStatic;
 
 export function isText(node: any) {
-  return node.type === 2
+  return node.type === 2 || node.type === 5
 }
