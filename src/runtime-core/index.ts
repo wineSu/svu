@@ -23,7 +23,9 @@ import {
 import {
     createVnode,
     Text,
-    Fragment
+    Fragment,
+    openBlock,
+    createBlock
 } from './vnode'
 
 import {
@@ -561,9 +563,9 @@ function createAppAPI<HostElement>(
     }
 }
 
-const h = (type: any, props?: any, children?: any): VNode => createVnode(type, props, children);
-
 export {
     createRenderer,
-    h
+    createVnode,
+    openBlock,
+    createBlock
 }

@@ -1,6 +1,8 @@
 import {
     createRenderer,
-    h
+    createVnode,
+    openBlock,
+    createBlock
 } from '../runtime-core';
 
 import {
@@ -51,7 +53,9 @@ function normalizeContainer(
 }
 
 export {
-    h,
+    createVnode,
+    openBlock,
+    createBlock,
     createApp,
     onBeforeMount,
     onMounted,

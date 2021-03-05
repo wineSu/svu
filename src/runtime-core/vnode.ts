@@ -107,7 +107,10 @@ export const createVnode = (
 
     // 处理子节点
     normalizeChildren(vnode, children);
-    
+    // 增加block点的处理
+    if ( currentBlock && patchFlag > 0) {
+      currentBlock.push(vnode);
+    }
     return vnode;
 }
 
