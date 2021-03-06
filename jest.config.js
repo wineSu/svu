@@ -28,7 +28,7 @@ module.exports = {
     '!packages/vue/src/devCheck.ts',
     // only used as a build entry
     '!packages/vue/src/runtime.ts'
-  ],
+  ], 
   watchPathIgnorePatterns: ['/node_modules/', '/dist/', '/.git/'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],
   moduleNameMapper: {

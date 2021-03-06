@@ -19,7 +19,7 @@
       "@vue/*": ["packages/*/src"],
       "vue": ["packages/vue/src"]
     }
-  },
+  }, 
   "include": ["src/**/*"],
   "exclude": ["test/*", "node_modules"]
 }
