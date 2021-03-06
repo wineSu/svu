@@ -35,8 +35,8 @@ export const Static = Symbol('Static')
 export const blockStack: (VNode[] | null)[] = []
 let currentBlock: VNode[] | null = null
 
-export function openBlock(disableTracking = false) {
-  blockStack.push((currentBlock = disableTracking ? null : []))
+export function openBlock() {
+  blockStack.push((currentBlock = []))
 }
 
 export function closeBlock() {
