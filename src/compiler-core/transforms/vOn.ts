@@ -16,7 +16,7 @@ export const transformOn = (
     if (arg.type === NodeTypes.SIMPLE_EXPRESSION) {
         if (arg.isStatic) {
             eventName = createSimpleExpression(
-                'click',
+                'onClick',
                 true,
                 arg.loc
             )

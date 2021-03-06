@@ -40,7 +40,6 @@ function patchAttr(el: RendererNode, key: string, value: any) {
 function patchEvent(
     el: RendererNode,
     rawName: string,
-    prevValue: any,
     nextValue: any,
 ) {
     const invokers = el._vei || (el._vei = {});
@@ -76,7 +75,7 @@ export const patchProp: DOMRenderOptions['patchProp'] = (
         default:
             // 事件处理
             if(isOn(key)){
-                patchEvent(el, key, prevValue, nextValue)
+                patchEvent(el, key, nextValue)
             }else{
                 patchAttr(el, key, nextValue);
             }
