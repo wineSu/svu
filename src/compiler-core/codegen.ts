@@ -138,7 +138,6 @@ function genNodeList(
         if (isString(node)) {
             push(node)
         } else if (isArray(node)) {
-            console.log(node, 111111)
             genNodeListAsArray(node, context)
         } else {
             genNode(node, context)
@@ -317,7 +316,6 @@ function genConditionalExpression(
     node: any,
     context: any
 ) {
-    debugger
     const { test, consequent, alternate, newline: needNewline } = node
     const { push, indent, deindent, newline } = context
     if (test.type === NodeTypes.SIMPLE_EXPRESSION) {
