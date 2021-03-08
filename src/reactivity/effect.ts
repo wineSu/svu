@@ -86,6 +86,7 @@ function creatReactiveEffect<T = any>(
     fn: () => T,
     options: ReactiveEffectOptions
 ): ReactiveEffect<T>{
+    // TODO 增加一个栈存储effect  避免多个effect中赋值操作死循环问题，下面仅通过一个global的变量判断 只能保证一个effect的死循环问题
     const effect = function reactiveEffect(): unknown{
         try {
             activeEffect = effect;
