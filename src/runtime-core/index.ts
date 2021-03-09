@@ -404,7 +404,7 @@ function createRenderer<
             for(i = s1; i <= e1; i++){
                 const prevChild = c1[i];
                 // a b [c d e] f g
-                // a b [c] f g
+                // a b [] f g
                 if(patched >= toBePatched){
                     hostRemove(prevChild.el as any);
                     continue;
@@ -449,6 +449,7 @@ function createRenderer<
                     : [];
             j = increasingNewIndexSequence.length - 1;
             for (i = toBePatched - 1; i >= 0; i--) {
+                debugger
                 const nextIndex = s2 + i;
                 const nextChild = c2[nextIndex] as VNode;
                 const anchor = nextIndex + 1 < l2 ? (c2[nextIndex + 1] as VNode).el : null;
