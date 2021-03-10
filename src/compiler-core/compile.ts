@@ -9,6 +9,5 @@ import { generate } from './codegen';
 export function baseCompile(template: string) {
     const ast = baseParse(template);
     transform(ast);
-    console.log(ast)
     return generate(ast);
 }

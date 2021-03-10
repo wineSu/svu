@@ -54,99 +54,99 @@
                 </h2 >
             </div>
         `,
-        // setup() {
-        //     onBeforeMount(() => {
-        //         console.log('onBeforeMount')
-        //     }),
-        //     onMounted(() => {
-        //         console.log('onMounted')
-        //     }),
-        //     onBeforeUpdate(() => {
-        //         console.log('onBeforeUpdate')
-        //     }),
-        //     onUpdated(() => {
-        //         console.log('onUpdated')
-        //     }),
-        //     onBeforeUnmount(() => {
-        //         console.log('onBeforeUnmount')
-        //     }),
-        //     onUnmounted(() => {
-        //         console.log('onUnmounted')
-        //     })
-            
-        //     // const state = reactive({ flag: true, count: '0', });
-
-        //     const tes = () => {
-                
-        //         state.count++
-        //         console.log(state.count)
-        //     }
-
-        //     // let res = computed(() => {
-        //     //     console.log(1111111)
-        //     //     return 111
-        //     // })
-
-        //     const value = reactive({})
-        //     const cValue = computed(() => value.foo)
-        //     let dummy
-        //     effect(() => {
-        //         console.log(cValue.value, 2)
-        //         dummy = cValue.value
-        //     })
-        //     console.log(dummy, '-----------')
-        //     value.foo = 1
-        //     console.log(dummy, '+++++++++++++')
-        //     return {
-        //         res: {
-
-        //         },
-        //         // state,
-        //         tes
-        //     }
-
-        //     // setTimeout(() => {
-        //     //     // 测试批量更新
-        //     //     state.flag = false;
-        //     //     state.count = 100;
-        //     //     state.count = 200;
-        //     // }, 1000);
-           
-        //     // return () => {
-        //     //     return state.flag ?
-        //     //         h('div', { style: { color: 'red' }, onClick: $event => (console.log($event)), }, `${state.count}--hello`) :
-        //     //         h('p', { style: { color: 'blue' }, onClick: $event => (console.log($event)) }, `${state.count}--word`)
-        //     // }
-        // }
         setup() {
-            const state = reactive({ flag: true, count: '0', });
-            setTimeout(() => {
-                // 测试diff
-                state.flag = false;
-            }, 3000);
-            return () => {
-                return state.flag ?
-                    h('div', { style: { color: 'red' } }, [
-                        h("p", { key: "a" }, "1"),
-                        h("p", { key: "b" }, "2"),
-                        h("p", { key: "c" }, "3"),
-                        h("p", { key: "d" }, "4"),
-                        h("p", { key: "e" }, "5"),
-                        h("p", { key: "f" }, "6"),
-                        h("p", { key: "g" }, "7"),
-                    ]) :
-                    h('div', { style: { color: 'blue' } }, [
-                        h("p", { key: "a" }, "111"),
-                        h("p", { key: "b" }, "222"),
-                        h("p", { key: "e" }, "333"),
-                        h("p", { key: "c" }, "444"),
-                        h("p", { key: "d" }, "555"),
-                        h("p", { key: "h" }, "666"),
-                        h("p", { key: "f" }, "777"),
-                        h("p", { key: "g" }, "888"),
-                    ])
+            onBeforeMount(() => {
+                console.log('onBeforeMount')
+            }),
+            onMounted(() => {
+                console.log('onMounted')
+            }),
+            onBeforeUpdate(() => {
+                console.log('onBeforeUpdate')
+            }),
+            onUpdated(() => {
+                console.log('onUpdated')
+            }),
+            onBeforeUnmount(() => {
+                console.log('onBeforeUnmount')
+            }),
+            onUnmounted(() => {
+                console.log('onUnmounted')
+            })
+            
+            // const state = reactive({ flag: true, count: '0', });
+
+            const tes = () => {
+                
+                state.count++
+                console.log(state.count)
             }
+
+            // let res = computed(() => {
+            //     console.log(1111111)
+            //     return 111
+            // })
+
+            const value = reactive({})
+            const cValue = computed(() => value.foo)
+            let dummy
+            effect(() => {
+                console.log(cValue.value, 2)
+                dummy = cValue.value
+            })
+            console.log(dummy, '-----------')
+            value.foo = 1
+            console.log(dummy, '+++++++++++++')
+            return {
+                res: {
+
+                },
+                // state,
+                tes
+            }
+
+            // setTimeout(() => {
+            //     // 测试批量更新
+            //     state.flag = false;
+            //     state.count = 100;
+            //     state.count = 200;
+            // }, 1000);
+           
+            // return () => {
+            //     return state.flag ?
+            //         h('div', { style: { color: 'red' }, onClick: $event => (console.log($event)), }, `${state.count}--hello`) :
+            //         h('p', { style: { color: 'blue' }, onClick: $event => (console.log($event)) }, `${state.count}--word`)
+            // }
         }
+        // setup() {
+        //     const state = reactive({ flag: true, count: '0', });
+        //     setTimeout(() => {
+        //         // 测试diff
+        //         state.flag = false;
+        //     }, 3000);
+        //     return () => {
+        //         return state.flag ?
+        //             h('div', { style: { color: 'red' } }, [
+        //                 h("p", { key: "a" }, "1"),
+        //                 h("p", { key: "b" }, "2"),
+        //                 h("p", { key: "c" }, "3"),
+        //                 h("p", { key: "d" }, "4"),
+        //                 h("p", { key: "e" }, "5"),
+        //                 h("p", { key: "f" }, "6"),
+        //                 h("p", { key: "g" }, "7"),
+        //             ]) :
+        //             h('div', { style: { color: 'blue' } }, [
+        //                 h("p", { key: "a" }, "111"),
+        //                 h("p", { key: "b" }, "222"),
+        //                 h("p", { key: "e" }, "333"),
+        //                 h("p", { key: "c" }, "444"),
+        //                 h("p", { key: "d" }, "555"),
+        //                 h("p", { key: "h" }, "666"),
+        //                 h("p", { key: "f" }, "777"),
+        //                 h("p", { key: "g" }, "888"),
+        //             ])
+        //     }
+        // }
     }
     createApp(App).mount('#app');
 </script>

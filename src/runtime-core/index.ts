@@ -449,7 +449,6 @@ function createRenderer<
                     : [];
             j = increasingNewIndexSequence.length - 1;
             for (i = toBePatched - 1; i >= 0; i--) {
-                debugger
                 const nextIndex = s2 + i;
                 const nextChild = c2[nextIndex] as VNode;
                 const anchor = nextIndex + 1 < l2 ? (c2[nextIndex + 1] as VNode).el : null;
