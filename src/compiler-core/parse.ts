@@ -74,10 +74,11 @@ function getSelection(
     end?: Position
 ){
     end = end || getCursor(context)
+    let source = context.originalSource.slice(start.offset, end.offset);
     return {
         start,
         end,
-        source: context.originalSource.slice(start.offset, end.offset)
+        source
     }
 }
 
@@ -158,22 +159,24 @@ function parseInterpolation(context: ParserContext) {
     }
 }
 
+// 递归 后序遍历
 function parseElement(context: ParserContext, ancestors: Element[]): any {
+    // 拿出
     const element = parseTag(context, TagType.Start);
-
+    
     // children
     ancestors.push(element);
     const children = parseChildren(context, ancestors);
     ancestors.pop();
 
     element.children = children;
-
+    // 消除后半段标签
     if(startsWithEndTagOpen(context.source, element.tag)){
         parseTag(context, TagType.End);
     }
-
+    
+    // 消除后半个标签 需要重新计算source
     element.loc = getSelection(context, element.loc.start);
-
     return element;
 }
 
